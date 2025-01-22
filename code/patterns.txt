@@ -13,17 +13,36 @@
 // wish.
 
 
-// Twenty-four seven
-\d+/\d+
-
 
 // ADD YOUR PATTERNS HERE
+
+// URL
+// hex: %([\da-fA-F]){2}
+// domain: ([^;/?:@&=+$,?<>#%]|(%[\da-fA-F]{2}))+
+// IP: (\d+.)+\d+
+// port: :\d{4}
+// search part: /[^;/?:@&=+$,?<>#%]+
+// fragment: #[^;/?:@&=+$,?<>#%]+
+
+http(s)?://((([^;/?$<>#%]|(%[\da-fA-F]{2}))*)[/#?]?)*
+
 // email
 [a-zA-z0-9_.]{1,64}@.{1,255}
 
-// URL
+// alph and numbers
+[a-zA-Z]+\d+
 
 
+// - between words
+[a-zA-Z]+-[a-zA-Z]+
+
+// e.g.
+
+// 2.4.1
+([\d]+.)+[\d]+
+
+// Twenty-four seven
+\d+/\d+
 
 // The patterns will be tried from top to bottom, so it is a
 // good idea to put more specific patterns above more general
