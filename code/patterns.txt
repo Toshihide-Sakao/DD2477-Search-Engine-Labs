@@ -27,22 +27,35 @@
 http(s)?://((([^;/?$<>#%]|(%[\da-fA-F]{2}))*)[/#?]?)*
 
 // email
-[a-zA-z0-9_.]{1,64}@.{1,255}
+[a-zA-z0-9_\.]{1,64}@[a-zA-z0-9_\.]{1,255}
+
+// phone
+\+\d+
+
+// special e.g.
+([A-Za-z]+\.)+[A-Za-z]+\.
+
+// comma
+([\d]+,)+[\d]+
+
+// : clock
+([\d]+\:)+[\d]+
+
+// e.g. and 2.4.1
+([A-Za-z\d]+(\.|_|-))+[A-Za-z\d]+
+
+
+// $ number
+\$\d+
 
 // alph and numbers
 [a-zA-Z]+\d+
 
-
-// - between words
-[a-zA-Z]+-[a-zA-Z]+
-
-// e.g.
-
-// 2.4.1
-([\d]+.)+[\d]+
-
 // Twenty-four seven
 \d+/\d+
+
+// ' apostrophe
+[a-zA-Z]*'[a-zA-Z]+\z
 
 // The patterns will be tried from top to bottom, so it is a
 // good idea to put more specific patterns above more general
