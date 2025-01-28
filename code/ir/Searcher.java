@@ -81,6 +81,23 @@ public class Searcher {
         return answer;
     }
 
+    private PostingsList ContiguousAll(Query query) {
+        PostingsList answer = index.getPostings(query.queryterm.get(0).term);
+        for (int i = 1; i < query.queryterm.size(); i++) {
+            answer = Contiguous(answer, index.getPostings(query.queryterm.get(i).term));
+        }
+
+        return answer;
+    }
+
+    private PostingsList Contiguous(PostingsList p1, PostingsList p2) {
+        PostingsList answer = new PostingsList();
+        
+        
+
+        return answer;
+    }
+
     private void PrintSearchedTerms(Query query) {
         System.out.printf("DEBUG: the term searched: ");
         for (int i = 0; i < query.queryterm.size(); i++) {

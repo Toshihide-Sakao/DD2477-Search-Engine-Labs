@@ -24,23 +24,23 @@ public class PostingsList {
         return list.get(i);
     }
 
-    public void add(int docID, double offset, double score) {
-        if (cointains(docID)) {
+    public void add(int docID, int offset, double score) {
+        int contains = cointains(docID);
+        if (contains != -1) {
+            list.get(contains).addOffset(offset);
             return;
         }
-        PostingsEntry entry = new PostingsEntry();
-        entry.docID = docID;
-        entry.score = score;
+        PostingsEntry entry = new PostingsEntry(docID, score, offset);
         list.add(entry);
     }
 
-    private Boolean cointains(int docID) {
+    private int cointains(int docID) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).docID == docID) {
-                return true;
+                return i;
             }
         }
-        return false;
+        return -1;
     }
 
     public void printList() {
