@@ -1,0 +1,55 @@
+# Task 1.3
+
+Own tests:
+- "This is the userpage that represents Allegre Management" 1 matching
+- "name erik 17 email" 2 matching
+
+TODO: draw how it works on paper
+
+# Task 1.4
+
+Own tests:
+- "This is the userpage that represents Allegre Management" 1 matching
+- "name erik 17 email" 0 matching
+
+TODO: Draw also
+
+# Task 1.5
+$Good = 16$
+
+$Retrieved = 22$
+
+$Relevant = 100$
+
+$Precision = 16 / 22 = 8 / 11 = 0.7273...$
+
+$Recall = 16 / 100 = 0.16$
+
+# Task 1.6
+
+"Mathematics graduate UC Davis Info" 13 matching
+```
+2 Private_Tutoring.f 0
+2 What_I_Wish_I_Knew...Before_Coming_to_UC_Davis_Entomology.f 1
+2 MattHh.f 0
+2 PhilipNeustrom.f 0
+2 ECE_Course_Reviews.f 3
+```
+
+"Mathematics graduate-level UC Davis Course Info" 5 matching
+```
+2 Private_Tutoring.f 0
+2 2011_Archive.f 0
+2 What_I_Wish_I_Knew...Before_Coming_to_UC_Davis_Entomology.f 1
+2 MattHh.f 0
+2 ECE_Course_Reviews.f 3
+```
+
+"Mathematics graduate level UC Davis Course Information Lecture" 4 matching
+```
+2 Teaching_Assistants.f 2
+2 Computer_Science.f 1
+2 What_I_Wish_I_Knew...Before_Coming_to_UC_Davis_Entomology.f 1
+2 Mathematics.f 3
+```
+best recall
