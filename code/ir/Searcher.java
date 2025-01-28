@@ -40,7 +40,7 @@ public class Searcher {
         switch (queryType) {
             case PHRASE_QUERY:
 
-                return null;
+                return ContiguousAll(query);
             case INTERSECTION_QUERY:
                 return IntersectAll(query);
             case RANKED_QUERY:
@@ -57,10 +57,11 @@ public class Searcher {
     private PostingsList IntersectAll(Query query) {
         PostingsList answer = index.getPostings(query.queryterm.get(0).term);
         for (int i = 1; i < query.queryterm.size(); i++) {
-            if (query.queryterm.get(i) == null) { // TEST:
+            PostingsList next = index.getPostings(query.queryterm.get(i).term);
+            if (next == null) { // TEST:
                 continue;
             }
-            answer = Intersect(answer, index.getPostings(query.queryterm.get(i).term));
+            answer = Intersect(answer, next);
         }
 
         return answer;
@@ -89,6 +90,10 @@ public class Searcher {
     private PostingsList ContiguousAll(Query query) {
         PostingsList answer = index.getPostings(query.queryterm.get(0).term);
         for (int i = 1; i < query.queryterm.size(); i++) {
+            PostingsList next = index.getPostings(query.queryterm.get(i).term);
+            if (next == null) {
+                continue;
+            }
             answer = Contiguous(answer, index.getPostings(query.queryterm.get(i).term));
         }
 
