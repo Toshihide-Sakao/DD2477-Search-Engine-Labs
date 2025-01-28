@@ -24,10 +24,28 @@ public class PostingsList {
         return list.get(i);
     }
 
-    public void add(int docID, double score) {
+    public void add(int docID, double offset, double score) {
+        if (cointains(docID)) {
+            return;
+        }
         PostingsEntry entry = new PostingsEntry();
         entry.docID = docID;
         entry.score = score;
         list.add(entry);
+    }
+
+    private Boolean cointains(int docID) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).docID == docID) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void printList() {
+        for (int i = 0; i < list.size(); i++) {
+            System.out.printf("DocID: %d\n", list.get(i).docID);
+        }
     }
 }

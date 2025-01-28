@@ -27,7 +27,7 @@ public class HashedIndex implements Index {
             list = new PostingsList();
             index.put(token, list);
         }
-        list.add(docID, offset);
+        list.add(docID, offset, 0);
     }
 
     /**

@@ -36,7 +36,11 @@ public class Searcher {
 
         switch (queryType) {
             case PHRASE_QUERY:
-                return index.getPostings(query.queryterm.get(0).term);
+                System.out.println("DEBUG: the term searched: " + query.queryterm.get(0).term);
+                PostingsList test = index.getPostings(query.queryterm.get(0).term);
+                
+                // test.printList();
+                return test;
             case INTERSECTION_QUERY:
                 return null;
             case RANKED_QUERY:
