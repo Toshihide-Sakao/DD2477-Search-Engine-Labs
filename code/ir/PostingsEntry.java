@@ -8,11 +8,14 @@
 package ir;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 
     public int docID;
     public double score = 0;
+
+    private ArrayList<Integer> offsets = new ArrayList<Integer>();
 
     /**
      * PostingsEntries are compared by their score (only relevant
@@ -25,7 +28,16 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
         return Double.compare(other.score, score);
     }
 
-    //
-    // YOUR CODE HERE
-    //
+    // mine
+    public void addOffset(int offset) {
+        offsets.add(offset);
+    }
+
+    public int getOffset(int i) {
+        return offsets.get(i);
+    }
+
+    public ArrayList<Integer> getOffsets() {
+        return offsets;
+    }
 }

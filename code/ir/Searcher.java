@@ -33,16 +33,14 @@ public class Searcher {
         if (query.queryterm == null) {
             return null;
         }
+        PrintSearchedTerms(query);
 
         switch (queryType) {
             case PHRASE_QUERY:
-                System.out.println("DEBUG: the term searched: " + query.queryterm.get(0).term);
-                PostingsList test = index.getPostings(query.queryterm.get(0).term);
-                
-                // test.printList();
-                return test;
-            case INTERSECTION_QUERY:
+
                 return null;
+            case INTERSECTION_QUERY:
+                return IntersectAll(query);
             case RANKED_QUERY:
                 return null;
             default:
@@ -50,5 +48,44 @@ public class Searcher {
         }
 
         return null;
+    }
+
+    // 4 elements
+    // e.g. 0 to 1, 1 to 2, 2 to 3
+    private PostingsList IntersectAll(Query query) {
+        PostingsList answer = index.getPostings(query.queryterm.get(0).term);
+        for (int i = 1; i < query.queryterm.size(); i++) {
+            answer = Intersect(answer, index.getPostings(query.queryterm.get(i).term));
+        }
+
+        return answer;
+    }
+
+    // TIme complexity O(n + m)
+    private PostingsList Intersect(PostingsList p1, PostingsList p2) {
+        PostingsList answer = new PostingsList();
+        int i = 0;
+        int j = 0;
+        while (i < p1.size() && j < p2.size()) {
+            if (p1.get(i).docID == p2.get(j).docID) {
+                answer.add(p1.get(i).docID, 0, 0);
+                i++;
+                j++;
+            } else if (p1.get(i).docID < p2.get(j).docID) {
+                i++;
+            } else {
+                j++;
+            }
+        }
+
+        return answer;
+    }
+
+    private void PrintSearchedTerms(Query query) {
+        System.out.printf("DEBUG: the term searched: ");
+        for (int i = 0; i < query.queryterm.size(); i++) {
+            System.out.printf("%s ", query.queryterm.get(i).term);
+        }
+        System.out.println();
     }
 }
