@@ -129,6 +129,7 @@ public class Tokenizer {
         String line = null;
         try {
             BufferedReader in = new BufferedReader( new FileReader( filename ));
+
             while (( line = in.readLine()) != null ) {
                 line = line.trim();
                 if ( !line.startsWith( "//" ) && line.length() > 0 ) {

@@ -3,12 +3,12 @@
  *   Information Retrieval course at KTH.
  * 
  *   Johan Boye, 2017
- */  
+ */
 
 package ir;
 
 /**
- *  Searches an index for results of a query.
+ * Searches an index for results of a query.
  */
 public class Searcher {
 
@@ -17,21 +17,34 @@ public class Searcher {
 
     /** The k-gram index to be searched by this Searcher */
     KGramIndex kgIndex;
-    
+
     /** Constructor */
-    public Searcher( Index index, KGramIndex kgIndex ) {
+    public Searcher(Index index, KGramIndex kgIndex) {
         this.index = index;
         this.kgIndex = kgIndex;
     }
 
     /**
-     *  Searches the index for postings matching the query.
-     *  @return A postings list representing the result of the query.
+     * Searches the index for postings matching the query.
+     * 
+     * @return A postings list representing the result of the query.
      */
-    public PostingsList search( Query query, QueryType queryType, RankingType rankingType, NormalizationType normType ) { 
-        //
-        //  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-        //
+    public PostingsList search(Query query, QueryType queryType, RankingType rankingType, NormalizationType normType) {
+        if (query.queryterm == null) {
+            return null;
+        }
+
+        switch (queryType) {
+            case PHRASE_QUERY:
+                return index.getPostings(query.queryterm.get(0).term);
+            case INTERSECTION_QUERY:
+                return null;
+            case RANKED_QUERY:
+                return null;
+            default:
+                break;
+        }
+
         return null;
     }
 }
