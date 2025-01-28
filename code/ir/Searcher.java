@@ -7,6 +7,8 @@
 
 package ir;
 
+import java.util.ArrayList;
+
 /**
  * Searches an index for results of a query.
  */
@@ -55,6 +57,9 @@ public class Searcher {
     private PostingsList IntersectAll(Query query) {
         PostingsList answer = index.getPostings(query.queryterm.get(0).term);
         for (int i = 1; i < query.queryterm.size(); i++) {
+            if (query.queryterm.get(i) == null) { // TEST:
+                continue;
+            }
             answer = Intersect(answer, index.getPostings(query.queryterm.get(i).term));
         }
 
@@ -92,8 +97,32 @@ public class Searcher {
 
     private PostingsList Contiguous(PostingsList p1, PostingsList p2) {
         PostingsList answer = new PostingsList();
-        
-        
+        int i = 0;
+        int j = 0;
+        while (i < p1.size() && j < p2.size()) {
+            if (p1.get(i).docID == p2.get(j).docID) {
+                ArrayList<Integer> offsets1 = p1.get(i).getOffsets();
+                ArrayList<Integer> offsets2 = p2.get(j).getOffsets();
+                int k = 0;
+                int l = 0;
+                while (k < offsets1.size() && l < offsets2.size()) {
+                    if (offsets1.get(k) + 1 == offsets2.get(l)) {
+                        answer.add(p1.get(i).docID, offsets2.get(l), 0);
+                        break;
+                    } else if (offsets1.get(k) < offsets2.get(l)) {
+                        k++;
+                    } else {
+                        l++;
+                    }
+                }
+                i++;
+                j++;
+            } else if (p1.get(i).docID < p2.get(j).docID) {
+                i++;
+            } else {
+                j++;
+            }
+        }
 
         return answer;
     }
