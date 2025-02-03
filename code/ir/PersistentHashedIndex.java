@@ -84,6 +84,7 @@ public class PersistentHashedIndex implements Index {
         }
 
         try {
+            System.out.println( "Reading index from disk" );
             readDocInfo();
         } catch ( FileNotFoundException e ) {
         } catch ( IOException e ) {
@@ -98,7 +99,7 @@ public class PersistentHashedIndex implements Index {
      */ 
     int writeData( String dataString, long ptr ) {
         try {
-            dataFile.seek( ptr ); 
+            dataFile.seek( ptr );
             byte[] data = dataString.getBytes();
             dataFile.write( data );
             return data.length;
@@ -203,14 +204,26 @@ public class PersistentHashedIndex implements Index {
             writeDocInfo();
 
             // Write the dictionary and the postings list
-
-            // 
-            //  YOUR CODE HERE
-            //
+            for ( Map.Entry<String,PostingsList> entry : index.entrySet() ) {
+                String key = entry.getKey();
+                PostingsList value = entry.getValue();
+                long ptr = hash( key );
+                Entry e = readEntry( ptr );
+                if ( e != null ) {
+                    collisions++;
+                }
+                writeEntry( e, ptr );
+            }
+            
         } catch ( IOException e ) {
             e.printStackTrace();
         }
         System.err.println( collisions + " collisions." );
+    }
+
+    private long hash( String key ) {
+        return 0;
+        // return Math.abs( key.hashCode() ) % TABLESIZE;
     }
 
 
@@ -233,9 +246,12 @@ public class PersistentHashedIndex implements Index {
      *  Inserts this token in the main-memory hashtable.
      */
     public void insert( String token, int docID, int offset ) {
-        //
-        //  YOUR CODE HERE
-        //
+        PostingsList list = index.get(token);
+        if (list == null) {
+            list = new PostingsList();
+            index.put(token, list);
+        }
+        list.add(docID, offset, 0);
     }
 
 

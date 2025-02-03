@@ -43,6 +43,19 @@ public class PostingsList {
         return -1;
     }
 
+    @Override
+    public String toString() {
+        String s = "";
+        for (int i = 0; i < list.size(); i++) {
+            s += list.get(i).docID + ":";
+            for (int j = 0; j < list.get(i).getOffsets().size(); j++) {
+                s += list.get(i).getOffsets().get(j) + ";";
+            }
+        }
+
+        return s;
+    }
+
     public void printList() {
         for (int i = 0; i < list.size(); i++) {
             System.out.printf("DocID: %d\n", list.get(i).docID);

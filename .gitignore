@@ -3,6 +3,8 @@
 /daviswiki/*.f
 /guardian/
 
+/code/index/*
+
 #Java
 # Compiled class file
 *.class
