@@ -169,13 +169,8 @@ public class PersistentHashedIndex implements Index {
      * 
      * @param ptr The place in the dictionary file to store the entry
      */
-    void writeEntry(Entry entry, long ptr, int collisions) {
+    void writeEntry(Entry entry, long ptr) {
         try {
-            if (isEntryCollision(ptr)) {
-                collisions++;
-                // System.out.println("Collision detected at ptr: " + ptr);
-                return;
-            }
             dictionaryFile.seek(ptr);
             ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES * 2); // every byte 8 bytes
             buffer.putLong(entry.ptr);
@@ -190,14 +185,13 @@ public class PersistentHashedIndex implements Index {
         try {
             dictionaryFile.seek(ptr);
             byte[] dataptr = new byte[Long.BYTES];
-            dictionaryFile.readFully(dataptr);
-            ByteBuffer.wrap(dataptr).getLong();
+            dictionaryFile.read(dataptr);
 
-            return false;
+            return dataptr[0] != -1;
         } catch (Exception e) {
-            return true;
+            e.printStackTrace();
         }
-
+        return true;
     }
 
     /**
@@ -282,7 +276,12 @@ public class PersistentHashedIndex implements Index {
                 String listString = list.toString() + "\n";
                 long hashed = hash(key) * (Long.BYTES * 2); // 2 longs for ptr and size
                 Entry entry = new Entry(key, entryptr, listString);
-                writeEntry(entry, hashed, collisions);
+                
+                if (isEntryCollision(hashed)) {
+                    collisions++;
+                }
+
+                writeEntry(entry, hashed);
                 writeData(listString, entryptr);
 
                 // System.out.println("Key: " + key + " Hashed: " + hashed + " Entryptr: " +
