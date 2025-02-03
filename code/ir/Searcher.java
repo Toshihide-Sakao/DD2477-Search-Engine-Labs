@@ -94,7 +94,7 @@ public class Searcher {
             if (next == null) {
                 continue;
             }
-            answer = Contiguous(answer, index.getPostings(query.queryterm.get(i).term));
+            answer = Contiguous(answer, next);
         }
 
         return answer;
