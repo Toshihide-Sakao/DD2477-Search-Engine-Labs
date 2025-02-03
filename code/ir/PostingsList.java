@@ -13,6 +13,7 @@ public class PostingsList {
 
     /** The postings list */
     private ArrayList<PostingsEntry> list = new ArrayList<PostingsEntry>();
+    private int lastDocID = -1;
 
     /** Number of postings in this list. */
     public int size() {
@@ -25,23 +26,24 @@ public class PostingsList {
     }
 
     public void add(int docID, int offset, double score) {
-        int contains = cointains(docID);
-        if (contains != -1) {
-            list.get(contains).addOffset(offset);
+        // int contains = cointains(docID);
+        if (docID == lastDocID) {
+            list.get(list.size()-1).addOffset(offset);
             return;
         }
         PostingsEntry entry = new PostingsEntry(docID, score, offset);
         list.add(entry);
+        lastDocID = docID;
     }
 
-    private int cointains(int docID) {
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).docID == docID) {
-                return i;
-            }
-        }
-        return -1;
-    }
+    // private int cointains(int docID) {
+    //     for (int i = 0; i < list.size(); i++) {
+    //         if (list.get(i).docID == docID) {
+    //             return i;
+    //         }
+    //     }
+    //     return -1;
+    // }
 
     // N: number of DocID
     // ; end of DocID
