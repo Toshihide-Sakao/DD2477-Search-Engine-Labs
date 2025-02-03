@@ -43,15 +43,21 @@ public class PostingsList {
         return -1;
     }
 
+    // N: number of DocID
+    // ; end of DocID
+    // 2:D1:O1:O2:O3;D2:O1:O2;
     @Override
     public String toString() {
         String s = "";
+        s += list.size() + ";";
         for (int i = 0; i < list.size(); i++) {
-            s += list.get(i).docID + ":";
+            s += list.get(i).docID;
             for (int j = 0; j < list.get(i).getOffsets().size(); j++) {
-                s += list.get(i).getOffsets().get(j) + ";";
+                s += ":" + list.get(i).getOffsets().get(j);
             }
+            s += ";";
         }
+        
 
         return s;
     }

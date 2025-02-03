@@ -8,9 +8,8 @@
 package ir;
 
 import java.io.*;
-import java.util.*;
 import java.nio.ByteBuffer;
-import java.nio.charset.*;
+import java.util.*;
 
 /*
  *   Implements an inverted index as a hashtable on disk.
@@ -69,6 +68,23 @@ public class PersistentHashedIndex implements Index {
             this.token = token;
             this.ptr = ptr;
             this.data = data;
+        }
+
+        public PostingsList getPostingsList() {
+            System.out.println("Data: " + data);
+            String[] list = data.split("[;]");
+
+            PostingsList postings = new PostingsList();
+
+            int size = Integer.parseInt(list[0]);
+            for (int i = 1; i < size; i++) {
+                String[] doc = list[i].split("[:]");
+                int docID = Integer.parseInt(doc[0]);
+                int offset = Integer.parseInt(doc[i]);
+
+                postings.add(docID, 0, offset);
+            }
+            return postings;
         }
     }
 
@@ -140,9 +156,13 @@ public class PersistentHashedIndex implements Index {
     void writeEntry(Entry entry, long ptr) {
         try {
             dictionaryFile.seek(ptr);
-            ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES); // every byte 8 bytes
+            ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES * 2); // every byte 8 bytes
             buffer.putLong(entry.ptr);
+            buffer.putLong(entry.data.getBytes().length + 1); // +1 for newline
             dictionaryFile.write(buffer.array());
+
+            // byte[] data = Long.toString(entry.ptr).getBytes();
+            // dictionaryFile.write(data);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -153,10 +173,22 @@ public class PersistentHashedIndex implements Index {
      *
      * @param ptr The place in the dictionary file where to start reading.
      */
-    Entry readEntry(long ptr) {
-        //
-        // REPLACE THE STATEMENT BELOW WITH YOUR CODE
-        //
+    Entry readEntry(String token, long ptr) {
+        try {
+            dictionaryFile.seek(ptr);
+            byte[] dataptr = new byte[Long.BYTES];
+            byte[] datasize = new byte[Long.BYTES];
+            dictionaryFile.readFully(dataptr);
+            dictionaryFile.readFully(datasize);
+
+            long entryptr = ByteBuffer.wrap(dataptr).getLong();
+            long size = ByteBuffer.wrap(datasize).getLong();
+            String data = readData(entryptr, (int)size);
+
+            return new Entry(token, entryptr, data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -206,14 +238,27 @@ public class PersistentHashedIndex implements Index {
             // Write the 'docNames' and 'docLengths' hash maps to a file
             writeDocInfo();
 
+            // TODO: remove later
+            // Console testing = System.console();
+
             // Write the dictionary and the postings list
             long entryptr = 0;
-            // for (Map.Entry<String, PostingsList> entry : index.entrySet()) {
-            //     Entry e = new Entry(entry.getKey(), entryptr, entry.getValue().toString());
-            //     long ptr = hash(e.token) * 8; // every long is 8 bytes
-            //     writeEntry(e, ptr);
-            //     entryptr += e.data.length();
-            // }
+            for (Map.Entry<String, PostingsList> value : index.entrySet()) {
+                String key = value.getKey();
+                PostingsList list = value.getValue();
+                long hashed = hash(key) * (Long.BYTES * 2); // 2 longs for ptr and size
+                Entry entry = new Entry(key, entryptr, list.toString());
+                writeEntry(entry, hashed);
+                writeData(list.toString() + "\n", entryptr);
+
+                // System.out.println("Key: " + key + " Hashed: " + hashed + " Entryptr: " + entryptr + "listStr: "
+                //         + list.toString());
+                entryptr += list.toString().getBytes().length + 1; // +1 for newline
+
+                // Check for collisions
+                // System.out.println(" ---------------- ");
+                // String str = testing.readLine();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -237,9 +282,9 @@ public class PersistentHashedIndex implements Index {
      * if the term is not in the index.
      */
     public PostingsList getPostings(String token) {
-        //
-        // REPLACE THE STATEMENT BELOW WITH YOUR CODE
-        //
+        Entry entry = readEntry(token, hash(token) * (Long.BYTES * 2));
+        entry.getPostingsList();
+
         return null;
     }
 
