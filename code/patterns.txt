@@ -17,12 +17,6 @@
 // ADD YOUR PATTERNS HERE
 
 // URL
-// hex: %([\da-fA-F]){2}
-// domain: ([^;/?:@&=+$,?<>#%]|(%[\da-fA-F]{2}))+
-// IP: (\d+.)+\d+
-// port: :\d{4}
-// search part: /[^;/?:@&=+$,?<>#%]+
-// fragment: #[^;/?:@&=+$,?<>#%]+
 
 http(s)?://((([^;/?$<>#%]|(%[\da-fA-F]{2}))*)[/#?]?)*
 
@@ -45,7 +39,7 @@ http(s)?://((([^;/?$<>#%]|(%[\da-fA-F]{2}))*)[/#?]?)*
 ([A-Za-z\d]+(\.|_|-))+[A-Za-z\d]+
 
 
-// $ number
+// $ money number
 \$\d+
 
 // alph and numbers
