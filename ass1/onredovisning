@@ -1,7 +1,7 @@
 # Task 1.3
 
 Own tests:
-- "This is the userpage that represents Allegre Management" 1 matching
+- "userpage that represents Allegre" 1 matching
 - "name erik 17 email" 2 matching
 
 TODO: draw how it works on paper
@@ -9,10 +9,10 @@ TODO: draw how it works on paper
 # Task 1.4
 
 Own tests:
-- "This is the userpage that represents Allegre Management" 1 matching
+- "userpage that represents Allegre Management" 1 matching
 - "name erik 17 email" 0 matching
 
-TODO: Draw also
+TODO: Draw here as well
 
 # Task 1.5
 $Good = 16$
@@ -52,4 +52,4 @@ $Recall = 16 / 100 = 0.16$
 2 What_I_Wish_I_Knew...Before_Coming_to_UC_Davis_Entomology.f 1
 2 Mathematics.f 3
 ```
-best recall
+best precision
