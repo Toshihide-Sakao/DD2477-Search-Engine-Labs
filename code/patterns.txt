@@ -17,14 +17,11 @@
 // ADD YOUR PATTERNS HERE
 
 // URL
-
 http(s)?://((([^;/?$<>#%]|(%[\da-fA-F]{2}))*)[/#?]?)*
 
 // email
 [a-zA-z0-9_\.]{1,64}@[a-zA-z0-9_\.]{1,255}
 
-// phone
-\+\d+
 
 // special e.g.
 ([A-Za-z]+\.)+[A-Za-z]+\.
@@ -38,6 +35,8 @@ http(s)?://((([^;/?$<>#%]|(%[\da-fA-F]{2}))*)[/#?]?)*
 // e.g. and 2.4.1 and IP
 ([A-Za-z\d]+(\.|_|-))+[A-Za-z\d]+
 
+// phone
+(\+|-)\d+
 
 // $ money number
 \$\d+
