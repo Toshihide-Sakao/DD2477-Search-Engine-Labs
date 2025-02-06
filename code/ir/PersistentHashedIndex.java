@@ -11,6 +11,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+
 /*
  *   Implements an inverted index as a hashtable on disk.
  *   
@@ -80,7 +81,7 @@ public class PersistentHashedIndex implements Index {
             // System.out.printf("Token: %s, length: %d\n", token, list.length - 2);
             // System.out.printf("List: ");
             // for (int i = 0; i < list.length - 1; i++) {
-            // System.out.printf("[%s] ", list[i]);
+            //     System.out.printf("[%s] ", list[i]);
             // }
             // System.out.println();
 
@@ -341,10 +342,9 @@ public class PersistentHashedIndex implements Index {
         long hash = 5381;
 
         for (int i = 0; i < key.length(); i++) {
-            hash = hash * 31 + key.charAt(i);
+            hash = hash * 33 + key.charAt(i);
         }
         return Math.abs(hash);
-
     }
 
     // ==================================================================
