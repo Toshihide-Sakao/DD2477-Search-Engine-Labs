@@ -64,11 +64,13 @@ public class PersistentHashedIndex implements Index {
         long ptr;
         String data;
         long byteSize;
+        long probeCounter;
 
-        public Entry(String token, long ptr, String data) {
+        public Entry(String token, long ptr, String data, long probeCounter) {
             this.token = token;
             this.ptr = ptr;
             this.data = data;
+            this.probeCounter = probeCounter;
             this.byteSize = data.getBytes().length; // +1 for newline
         }
 
@@ -78,7 +80,7 @@ public class PersistentHashedIndex implements Index {
             // System.out.printf("Token: %s, length: %d\n", token, list.length - 2);
             // System.out.printf("List: ");
             // for (int i = 0; i < list.length - 1; i++) {
-            //     System.out.printf("[%s] ", list[i]);
+            // System.out.printf("[%s] ", list[i]);
             // }
             // System.out.println();
 
@@ -172,9 +174,10 @@ public class PersistentHashedIndex implements Index {
     void writeEntry(Entry entry, long ptr) {
         try {
             dictionaryFile.seek(ptr);
-            ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES * 2); // every byte 8 bytes
+            ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES * 3); // every byte 8 bytes
             buffer.putLong(entry.ptr);
             buffer.putLong(entry.byteSize);
+            buffer.putLong(entry.probeCounter);
             dictionaryFile.write(buffer.array());
         } catch (Exception e) {
             e.printStackTrace();
@@ -210,36 +213,33 @@ public class PersistentHashedIndex implements Index {
      */
     Entry readEntry(String token, long ptr) {
         try {
-            String data = "";
-            long entryptr = 0;
-            int counter = 1;
-            while (!data.startsWith(token)) {
-                // System.out.println("Reading at: " + ptr);
-                dictionaryFile.seek(ptr);
-                byte[] dataptr = new byte[Long.BYTES];
-                byte[] datasize = new byte[Long.BYTES];
-                dictionaryFile.readFully(dataptr);
-                dictionaryFile.readFully(datasize);
+            // while (!data.startsWith(token)) {
+            // // System.out.println("Reading at: " + ptr);
+            dictionaryFile.seek(ptr);
+            byte[] dataptr = new byte[Long.BYTES];
+            byte[] datasize = new byte[Long.BYTES];
+            byte[] datacounter = new byte[Long.BYTES];
+            dictionaryFile.readFully(dataptr);
+            dictionaryFile.readFully(datasize);
 
-                entryptr = ByteBuffer.wrap(dataptr).getLong();
-                long size = ByteBuffer.wrap(datasize).getLong();
+            long entryptr = ByteBuffer.wrap(dataptr).getLong();
+            long size = ByteBuffer.wrap(datasize).getLong();
+            long counter = ByteBuffer.wrap(datacounter).getLong();
 
-                if (dataptr == null || entryptr < 0 || datasize == null || size <= 0) {
-                    // System.out.println("Entry not found: " + token);
-                    return new Entry(token, -1, "");
-                }
+            ptr = fixHash(ptr, (int) counter);
 
-                data = readData(entryptr, (int) size);
-
-                // System.out.println("Read: " + data + " at: " + ptr + " with size: " + size);
-
-                // was a collision
-                ptr = fixHash(ptr, counter);
-                counter++;
+            if (dataptr == null || entryptr < 0 || datasize == null || size <= 0) {
+                return new Entry(token, -1, "", 0);
             }
 
+            String data = readData(entryptr, (int) size);
+
+            System.out.println("Token: " + token + " Data: " + data.substring(0, token.length()));
+
             data = data.substring(token.length() + 1); // remove token from data
-            return new Entry(token, entryptr, data);
+
+            return new Entry(token, entryptr, data, counter);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -247,7 +247,7 @@ public class PersistentHashedIndex implements Index {
     }
 
     private long fixHash(long ptr, int counter) {
-        return (((ptr + (long)counter*(long)counter)) % TABLESIZE) * (Long.BYTES * 2);
+        return (((ptr + (long) counter * (long) counter)) % TABLESIZE) * (Long.BYTES * 3);
     }
 
     // ==================================================================
@@ -307,21 +307,18 @@ public class PersistentHashedIndex implements Index {
                 String key = value.getKey();
                 PostingsList list = value.getValue();
                 String listString = key + ";" + list.toString() + "\n";
-                long hashed = (hash(key) % TABLESIZE) * (Long.BYTES * 2); // 2 longs for ptr and size
-                Entry entry = new Entry(key, entryptr, listString);
+                long hashed = (hash(key) % TABLESIZE) * (Long.BYTES * 3); // 2 longs for ptr and size
 
                 // Check for collisions
-                int probCounter = 1;
+                int probCounter = 0;
                 while (isEntryCollision(hashed)) { // if there is a collision get new hash
-                    // System.out.println("Collision at: " + hashed / (Long.BYTES * 2) + " with key: " + key);
-                    hashed = fixHash(hashed, probCounter);
-                    
-                    if (probCounter == 1) {
-                        collisions++;
-                    }
                     probCounter++;
+                    hashed = fixHash(hashed, probCounter);
+
+                    collisions++;
                 }
 
+                Entry entry = new Entry(key, entryptr, listString, probCounter);
                 writeEntry(entry, hashed);
                 writeData(listString, entryptr);
 
@@ -357,7 +354,7 @@ public class PersistentHashedIndex implements Index {
      * if the term is not in the index.
      */
     public PostingsList getPostings(String token) {
-        Entry entry = readEntry(token, (hash(token) % TABLESIZE) * (Long.BYTES * 2));
+        Entry entry = readEntry(token, (hash(token) % TABLESIZE) * (Long.BYTES * 3));
         return entry.getPostingsList();
 
         // return null;
