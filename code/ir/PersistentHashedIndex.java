@@ -80,7 +80,7 @@ public class PersistentHashedIndex implements Index {
             // System.out.printf("Token: %s, length: %d\n", token, list.length - 2);
             // System.out.printf("List: ");
             // for (int i = 0; i < list.length - 1; i++) {
-            // System.out.printf("[%s] ", list[i]);
+            //     System.out.printf("[%s] ", list[i]);
             // }
             // System.out.println();
 
