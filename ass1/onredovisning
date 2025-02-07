@@ -9,7 +9,7 @@ TODO: draw how it works on paper
 # Task 1.4
 
 Own tests:
-- "userpage that represents Allegre" 1 matching
+- "userpage that represents Allegre Management" 1 matching
 - "name erik 17 email" 0 matching
 
 TODO: Draw here as well
@@ -53,16 +53,3 @@ $Recall = 16 / 100 = 0.16$
 2 Mathematics.f 3
 ```
 best precision
-
-# Task 1.7
-43880 collisions. with djb2
-
-
-Problem with query "Burger and fries" phrase query: (not showing)
-Sudwerk.f
-Habit_Burger.f
-
-
-
-
-
