@@ -62,7 +62,7 @@ Problem with query "Burger and fries" phrase query: (not showing)
 Sudwerk.f
 Habit_Burger.f
 
-
+problem was in searcher
 
 
 
