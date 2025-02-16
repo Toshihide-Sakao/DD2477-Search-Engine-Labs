@@ -43,7 +43,7 @@ public class Searcher {
                 return ContiguousAll(query);
             case INTERSECTION_QUERY:
                 return IntersectAll(query);
-            case RANKED_QUERY:
+            case RANKED_QUERY: // TODO: 2.1
                 return null;
             default:
                 break;
