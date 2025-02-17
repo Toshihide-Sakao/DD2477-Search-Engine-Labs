@@ -20,6 +20,7 @@ public class Searcher {
     /** The k-gram index to be searched by this Searcher */
     KGramIndex kgIndex;
 
+
     /** Constructor */
     public Searcher(Index index, KGramIndex kgIndex) {
         this.index = index;
@@ -44,7 +45,8 @@ public class Searcher {
             case INTERSECTION_QUERY:
                 return IntersectAll(query);
             case RANKED_QUERY:
-                return Ranked(query);
+                return RankedAll(query);
+                // return Ranked(query, 0);
             default:
                 break;
         }
@@ -52,24 +54,31 @@ public class Searcher {
         return null;
     }
 
-    private PostingsList Ranked(Query query) {
-        PostingsList answer = index.getPostings(query.queryterm.get(0).term);
-        int N = index.docNames.size();
+    private PostingsList RankedAll(Query query) {
+        PostingsList answer = Ranked(query, 0);
+        for (int i = 1; i < query.queryterm.size(); i++) {
+            PostingsList next = Ranked(query, i);
+            answer.merge(next);
+        }
+        
+        answer.sort();
+        return answer;
+    }
+
+    private PostingsList Ranked(Query query, int j) {
+        int N = Index.docNames.size();
+        PostingsList answer = index.getPostings(query.queryterm.get(j).term);
         int df_t = answer.size();
         double idf_t = Math.log((double)N / (double)df_t);
 
-        System.out.println("idf_t: " + idf_t + " df_t: " + df_t + " N: " + N);
-
-        int tf_dt = 0;
-        int len_d = 0;
         for (int i = 0; i < df_t; i++) {
-            tf_dt = answer.get(i).getOffsets().size();
-            len_d = index.docLengths.get(answer.get(i).docID);
+            int tf_dt = answer.get(i).getOffsets().size();
+            int len_d = Index.docLengths.get(answer.get(i).docID);
 
-            double tf_idf_dt = tf_dt * (double)idf_t / len_d;
+            double tf_idf_dt = tf_dt * idf_t / (double)len_d;
             answer.get(i).setScore(tf_idf_dt);
         }
-        answer.sort();
+        // answer.sort();
         return answer;
     }
 

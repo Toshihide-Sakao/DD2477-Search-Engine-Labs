@@ -73,6 +73,32 @@ public class PostingsList {
         });
     }
 
+    public void merge(PostingsList other) {
+        if (other == null) {
+            return;
+        }
+
+        int i = 0;
+        int j = 0;
+        while (i < list.size() && j < other.size()) {
+            if (list.get(i).docID == other.get(j).docID) {
+                list.get(i).getOffsets().addAll(other.get(j).getOffsets());
+                list.get(i).score += other.get(j).score;
+                i++;
+                j++;
+            } else if (list.get(i).docID < other.get(j).docID) {
+                i++;
+            } else {
+                list.add(other.get(j));
+                j++;
+            }
+        }
+        while (j < other.size()) {
+            list.add(other.get(j));
+            j++;
+        }
+    }
+
     public void printList() {
         for (int i = 0; i < list.size(); i++) {
             System.out.printf("DocID: %d\n", list.get(i).docID);
