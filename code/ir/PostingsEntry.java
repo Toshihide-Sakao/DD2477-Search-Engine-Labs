@@ -43,6 +43,10 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
         return offsets.get(i);
     }
 
+    public void setScore(double score) {
+        this.score = score;
+    }
+
     public ArrayList<Integer> getOffsets() {
         return offsets;
     }
