@@ -1,1 +1,1 @@
-the green bag is in the blue box
+the red box is next to the green ball
