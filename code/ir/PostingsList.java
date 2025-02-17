@@ -8,6 +8,7 @@
 package ir;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class PostingsList {
 
@@ -63,9 +64,13 @@ public class PostingsList {
             }
             s += ";";
         }
-        
-
         return s;
+    }
+
+    public void sort() {
+        list.sort( (a, b) -> {
+            return Double.compare(b.score, a.score);
+        });
     }
 
     public void printList() {

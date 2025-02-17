@@ -43,13 +43,34 @@ public class Searcher {
                 return ContiguousAll(query);
             case INTERSECTION_QUERY:
                 return IntersectAll(query);
-            case RANKED_QUERY: // TODO: 2.1
-                return null;
+            case RANKED_QUERY:
+                return Ranked(query);
             default:
                 break;
         }
 
         return null;
+    }
+
+    private PostingsList Ranked(Query query) {
+        PostingsList answer = index.getPostings(query.queryterm.get(0).term);
+        int N = index.docNames.size();
+        int df_t = answer.size();
+        double idf_t = Math.log((double)N / (double)df_t);
+
+        System.out.println("idf_t: " + idf_t + " df_t: " + df_t + " N: " + N);
+
+        int tf_dt = 0;
+        int len_d = 0;
+        for (int i = 0; i < df_t; i++) {
+            tf_dt = answer.get(i).getOffsets().size();
+            len_d = index.docLengths.get(answer.get(i).docID);
+
+            double tf_idf_dt = tf_dt * (double)idf_t / len_d;
+            answer.get(i).setScore(tf_idf_dt);
+        }
+        answer.sort();
+        return answer;
     }
 
     // 4 elements
