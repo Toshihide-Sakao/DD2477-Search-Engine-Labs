@@ -53,3 +53,16 @@ $Recall = 16 / 100 = 0.16$
 2 Mathematics.f 3
 ```
 best precision
+
+# Task 1.7
+43880 collisions. with djb2
+
+
+Problem with query "Burger and fries" phrase query: (not showing)
+Sudwerk.f
+Habit_Burger.f
+
+problem was in searcher
+
+
+

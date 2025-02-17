@@ -129,12 +129,18 @@ public class Searcher {
             if (p1.get(i).docID == p2.get(j).docID) {
                 ArrayList<Integer> offsets1 = p1.get(i).getOffsets();
                 ArrayList<Integer> offsets2 = p2.get(j).getOffsets();
+
+                if (p1.get(i).docID == 3793) {
+                    System.out.println("DEBUG: 11 in offsets2: real: " + offsets2.size() + " offsets1: " + offsets1.size());
+                }
+
                 int k = 0;
                 int l = 0;
                 while (k < offsets1.size() && l < offsets2.size()) {
                     if (offsets1.get(k) + 1 == offsets2.get(l)) {
                         answer.add(p1.get(i).docID, offsets2.get(l), 0);
-                        break;
+                        k++;
+                        l++;
                     } else if (offsets1.get(k) < offsets2.get(l)) {
                         k++;
                     } else {
