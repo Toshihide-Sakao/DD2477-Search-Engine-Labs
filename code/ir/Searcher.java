@@ -70,13 +70,15 @@ public class Searcher {
         PostingsList answer = index.getPostings(query.queryterm.get(j).term);
         int df_t = answer.size();
         double idf_t = Math.log((double)N / (double)df_t);
-        System.out.println("DEBUG: idf_t: " + idf_t);
+        // System.out.println("DEBUG: idf_t: " + idf_t);
 
         for (int i = 0; i < df_t; i++) {
             int tf_dt = answer.get(i).getOffsets().size();
             int len_d = Index.docLengths.get(answer.get(i).docID);
 
-            System.out.println("DEBUG: " + answer.get(i).docID + "idf: " + tf_dt * idf_t);
+            // if (answer.get(i).docID == 0) {
+            //     System.out.println("DEBUG: docID: " + answer.get(i).docID + " tf: " + tf_dt + " idf: " + tf_dt * idf_t);
+            // }
 
             double tf_idf_dt = tf_dt * idf_t / (double)len_d;
             answer.get(i).setScore(tf_idf_dt);
