@@ -57,6 +57,8 @@ public class PersistentHashedIndex implements Index {
 
     // ===================================================================
 
+    // public PageRank pagerank;
+
     /**
      * A helper class representing one entry in the dictionary hashtable.
      */
@@ -125,6 +127,12 @@ public class PersistentHashedIndex implements Index {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // try {
+        //     pagerank = new PageRank();
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
     }
 
     /**
@@ -379,8 +387,16 @@ public class PersistentHashedIndex implements Index {
      */
     public void cleanup() {
         System.err.println(index.keySet().size() + " unique words");
-        System.err.print("Writing index to disk...");
-        writeIndex();
-        System.err.println("done!");
+        // TODO: uncomment these later
+        // System.err.print("Writing index to disk...");
+        // writeIndex();
+
+
+        // add pagerank computation
+        // System.err.println("Computing and writing pagerank...");
+        // pagerank = new PageRank();
+        // pagerank.compute();
+
+        // System.err.println("done!");
     }
 }

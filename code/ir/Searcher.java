@@ -20,11 +20,13 @@ public class Searcher {
     /** The k-gram index to be searched by this Searcher */
     KGramIndex kgIndex;
 
+    PageRank pagerank;
 
     /** Constructor */
     public Searcher(Index index, KGramIndex kgIndex) {
         this.index = index;
         this.kgIndex = kgIndex;
+        this.pagerank = new PageRank();
     }
 
     /**
@@ -38,15 +40,17 @@ public class Searcher {
         }
         PrintSearchedTerms(query);
 
+        // testing
+        // pagerank.printTop30();
+
         switch (queryType) {
             case PHRASE_QUERY:
-
                 return ContiguousAll(query);
             case INTERSECTION_QUERY:
                 return IntersectAll(query);
             case RANKED_QUERY:
                 return RankedAll(query, rankingType);
-                // return Ranked(query, 0);
+            // return Ranked(query, 0);
             default:
                 break;
         }
@@ -57,11 +61,12 @@ public class Searcher {
     private PostingsList RankedAll(Query query, RankingType rankingType) {
         switch (rankingType) {
             case TF_IDF:
-                return RankedAll_TF_IDF(query);
+                return RankedAllTF_IDF(query);
             case PAGERANK:
-                break;
+                return RankedAllPageRank(query);
+            // return RankedPageRank(query, 0);
             case COMBINATION:
-                break;
+                return RankedAllComb(query, 1000, 1);
             default:
                 break;
         }
@@ -69,36 +74,79 @@ public class Searcher {
         return new PostingsList();
     }
 
-    private PostingsList RankedAll_TF_IDF(Query query) {
-        PostingsList answer = Ranked_TF_IDF(query, 0);
-        for (int i = 1; i < query.queryterm.size(); i++) {
-            PostingsList next = Ranked_TF_IDF(query, i);
-            answer.merge(next);
-        }
-        
+    private PostingsList RankedAllComb(Query query, double prMult, double tfidfMult) {
+        PostingsList answerPR = RankedAllPageRank(query);
+        PostingsList answerTF_IDF = RankedAllTF_IDF(query);
+        PostingsList answer = Combine(answerPR, answerTF_IDF, prMult, tfidfMult);
+
         answer.sort();
         return answer;
     }
 
-    private PostingsList Ranked_TF_IDF(Query query, int j) {
+    private PostingsList Combine(PostingsList a, PostingsList b, double aMult, double bMult) {
+        PostingsList answer = new PostingsList();
+        for (int i = 0; i < a.size(); i++) {
+            for (int j = 0; j < b.size(); j++) {
+                if (a.get(i).docID == b.get(j).docID) {
+                    double score = aMult * a.get(i).score + bMult* b.get(j).score;
+                    answer.add(a.get(i).docID, 0, score);
+                }
+            }
+        }
+
+        return answer;
+    }
+
+    private PostingsList RankedAllPageRank(Query query) {
+        PostingsList answer = RankedPageRank(query, 0);
+        for (int i = 1; i < query.queryterm.size(); i++) {
+            PostingsList next = RankedPageRank(query, i);
+            answer.merge(next, 1);
+        }
+
+        answer.sort();
+        return answer;
+    }
+
+    private PostingsList RankedPageRank(Query query, int j) {
+        PostingsList answer = index.getPostings(query.queryterm.get(j).term);
+        for (int i = 0; i < answer.size(); i++) {
+            String docFile = index.docNames.get(answer.get(i).docID).substring("./../davisWiki/".length()); // FIX: now
+                                                                                                            // it is
+                                                                                                            // hardcode
+            // System.out.println("DEBUG: docFile: " + docFile);
+            double score = pagerank.getScore(docFile);
+            answer.get(i).setScore(score);
+        }
+
+        return answer;
+    }
+
+    private PostingsList RankedAllTF_IDF(Query query) {
+        PostingsList answer = RankedTF_IDF(query, 0);
+        for (int i = 1; i < query.queryterm.size(); i++) {
+            PostingsList next = RankedTF_IDF(query, i);
+            answer.merge(next, 0);
+        }
+
+        answer.sort();
+        return answer;
+    }
+
+    private PostingsList RankedTF_IDF(Query query, int j) {
         int N = Index.docNames.size();
         PostingsList answer = index.getPostings(query.queryterm.get(j).term);
         int df_t = answer.size();
-        double idf_t = Math.log((double)N / (double)df_t);
+        double idf_t = Math.log((double) N / (double) df_t);
         // System.out.println("DEBUG: idf_t: " + idf_t);
 
         for (int i = 0; i < df_t; i++) {
             int tf_dt = answer.get(i).getOffsets().size();
             int len_d = Index.docLengths.get(answer.get(i).docID);
 
-            // if (answer.get(i).docID == 0) {
-            //     System.out.println("DEBUG: docID: " + answer.get(i).docID + " tf: " + tf_dt + " idf: " + tf_dt * idf_t);
-            // }
-
-            double tf_idf_dt = tf_dt * idf_t / (double)len_d;
+            double tf_idf_dt = tf_dt * idf_t / (double) len_d;
             answer.get(i).setScore(tf_idf_dt);
         }
-        // answer.sort();
         return answer;
     }
 
@@ -160,7 +208,8 @@ public class Searcher {
                 ArrayList<Integer> offsets2 = p2.get(j).getOffsets();
 
                 if (p1.get(i).docID == 3793) {
-                    System.out.println("DEBUG: 11 in offsets2: real: " + offsets2.size() + " offsets1: " + offsets1.size());
+                    System.out.println(
+                            "DEBUG: 11 in offsets2: real: " + offsets2.size() + " offsets1: " + offsets1.size());
                 }
 
                 int k = 0;
@@ -194,5 +243,9 @@ public class Searcher {
             System.out.printf("%s ", query.queryterm.get(i).term);
         }
         System.out.println();
+    }
+
+    public PageRank getPageRank() {
+        return this.pagerank;
     }
 }

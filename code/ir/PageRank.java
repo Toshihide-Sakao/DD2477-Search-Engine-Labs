@@ -16,6 +16,9 @@ public class PageRank {
 	 */
 	HashMap<String, Integer> docNumber = new HashMap<String, Integer>();
 
+	HashMap<String, Integer> docFileNumber = new HashMap<String, Integer>();
+
+
 	/**
 	 * Mapping from document numbers to document names
 	 */
@@ -53,11 +56,74 @@ public class PageRank {
 	 */
 	final static double EPSILON = 0.0001;
 
+	private String linksFilename = "./data/linksDavis.txt";
+
+	private String davisTitlesFilename = "./data/davisTitles.txt";
+
+	private String outputFilename = "./index/pagerank";
+
+	double[] a;
+
+	private int noOfDocs = 0;
+
 	/* --------------------------------------------- */
 
-	public PageRank(String filename) {
-		int noOfDocs = readDocs(filename);
+	public PageRank() {
+		this.noOfDocs = readDocs();
+	}
+
+	public void compute() {
+		System.err.println("Computing PageRank...");
 		iterate(noOfDocs, 1000);
+		writeToFile();
+		System.err.println("Done computing PageRank and writing...");
+		readDavisTitle();
+	}
+
+	void writeToFile() {
+		try (FileOutputStream stream = new FileOutputStream(outputFilename); 
+				ObjectOutputStream out = new ObjectOutputStream(stream)) {
+			out.writeObject(a);
+			out.writeObject(docName);
+			stream.close();
+		}catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	void readPageRank() {
+		try (FileInputStream stream = new FileInputStream(outputFilename); 
+				ObjectInputStream in = new ObjectInputStream(stream)) {
+			System.err.println("Reading PageRank from file...");
+			a = (double[]) in.readObject();
+			docName = (String[]) in.readObject();
+			in.close();
+			stream.close();
+			// System.err.println("Done reading PageRank from file...");
+
+			// read davisTitles
+			readDavisTitle();
+		}catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	void readDavisTitle() {
+		try {
+			System.err.println("Reading davisTitles from file...");
+			BufferedReader in2 = new BufferedReader(new FileReader(davisTitlesFilename));
+			String line;
+			while ((line = in2.readLine()) != null) {
+				String[] parts = line.split(";");
+				String title = parts[1];
+				int index = Integer.parseInt(parts[0]);
+				docFileNumber.put(title, index);
+			}
+			in2.close();
+			System.err.println("Done reading davisTitles from file.");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/* --------------------------------------------- */
@@ -67,11 +133,11 @@ public class PageRank {
 	 *
 	 * @return the number of documents read.
 	 */
-	int readDocs(String filename) {
+	int readDocs() {
 		int fileIndex = 0;
 		try {
 			System.err.print("Reading file... ");
-			BufferedReader in = new BufferedReader(new FileReader(filename));
+			BufferedReader in = new BufferedReader(new FileReader(linksFilename));
 			String line;
 			while ((line = in.readLine()) != null && fileIndex < MAX_NUMBER_OF_DOCS) {
 				int index = line.indexOf(";");
@@ -113,25 +179,12 @@ public class PageRank {
 				System.err.print("done. ");
 			}
 		} catch (FileNotFoundException e) {
-			System.err.println("File " + filename + " not found!");
+			System.err.println("File " + linksFilename + " not found!");
 		} catch (IOException e) {
-			System.err.println("Error reading file " + filename);
+			System.err.println("Error reading file " + linksFilename);
 		}
 		System.err.println("Read " + fileIndex + " number of documents");
 		return fileIndex;
-	}
-
-	// FIX:
-	void writeToFile(String filename) {
-		try {
-			PrintWriter writer = new PrintWriter(filename, "UTF-8");
-			for (int i = 0; i < docName.length; i++) {
-				writer.println(docName[i]);
-			}
-			writer.close();
-		} catch (IOException e) {
-			System.err.println("Error writing to file " + filename);
-		}
 	}
 
 	/* --------------------------------------------- */
@@ -143,7 +196,7 @@ public class PageRank {
 	void iterate(int numberOfDocs, int maxIterations) {
 
 		// YOUR CODE HERE
-		double[] a = new double[numberOfDocs];
+		a = new double[numberOfDocs];
 		double[] aNext = new double[numberOfDocs];
 
 		double diff = 99;
@@ -156,7 +209,7 @@ public class PageRank {
 			if (counter % 10 == 0) {
 				System.out.println("Iteration: " + counter + " Diff: " + diff);
 			}
-			
+
 			diff = 0.0;
 			a = normalize(a);
 			for (int i = 0; i < numberOfDocs; i++) {
@@ -177,7 +230,7 @@ public class PageRank {
 					double Gval = ((1 - BORED) / out[i]) + (BORED / numberOfDocs);
 					aNext[j] += a[i] * Gval;
 				}
-				
+
 				for (int j = 0; j < numberOfDocs; j++) {
 					if (link.get(i).get(j) == null) {
 						aNext[j] += a[i] * (BORED / numberOfDocs);
@@ -198,19 +251,7 @@ public class PageRank {
 		System.out.println("Iterations: " + counter);
 		System.out.println("Diff: " + diff);
 
-		print_top30(a);
-		// print largest value
-		// double max = 0;
-		// int maxIndex = 0;
-		// for (int i = 0; i < numberOfDocs; i++) {
-		// 	if (a[i] > max) {
-		// 		max = a[i];
-		// 		maxIndex = i;
-		// 	}
-		// }
-		// System.out.println("highest: " + docName[maxIndex] + ": " + max + " outlinks: " + out[maxIndex]);
-		// System.out.println("245 is: " + ": " + a[docNumber.get("245")] + " outlinks: "
-		// 		+ out[docNumber.get("245")]);
+		// printTop30();
 	}
 
 	private double man_diff(double[] a, double[] aNext) {
@@ -225,7 +266,7 @@ public class PageRank {
 	private double euc_diff(double[] a, double[] aNext) {
 		double diff = 0;
 		for (int i = 0; i < a.length; i++) {
-			diff += (aNext[i] - a[i])*(aNext[i] - a[i]);
+			diff += (aNext[i] - a[i]) * (aNext[i] - a[i]);
 		}
 		// System.out.println("Diff: " + diff);
 		return Math.sqrt(diff);
@@ -244,7 +285,7 @@ public class PageRank {
 		return a;
 	}
 
-	private void print_top30(double[] a) {
+	public void printTop30() {
 		int[] top30 = new int[30];
 		double[] top30Val = new double[30];
 
@@ -284,15 +325,19 @@ public class PageRank {
 		}
 	}
 
-	
+	public double getScore(String docName) {
+		int index1 = docFileNumber.get(docName);
+		int index2 = docNumber.get(Integer.toString(index1));
+		return a[index2];
+	}
 
 	/* --------------------------------------------- */
 
 	// public static void main(String[] args) {
-	// 	if (args.length != 1) {
-	// 		System.err.println("Please give the name of the link file");
-	// 	} else {
-	// 		new PageRank(args[0]);
-	// 	}
+	// if (args.length != 1) {
+	// System.err.println("Please give the name of the link file");
+	// } else {
+	// new PageRank(args[0]);
+	// }
 	// }
 }

@@ -73,7 +73,7 @@ public class PostingsList {
         });
     }
 
-    public void merge(PostingsList other) {
+    public void merge(PostingsList other, int TYPE) {
         if (other == null) {
             return;
         }
@@ -82,8 +82,10 @@ public class PostingsList {
         int j = 0;
         while (i < list.size() && j < other.size()) {
             if (list.get(i).docID == other.get(j).docID) {
-                list.get(i).getOffsets().addAll(other.get(j).getOffsets());
-                list.get(i).score += other.get(j).score;
+                if (TYPE == 0) { // IF_IDF
+                    list.get(i).getOffsets().addAll(other.get(j).getOffsets());
+                    list.get(i).score += other.get(j).score;
+                }
                 i++;
                 j++;
             } else if (list.get(i).docID < other.get(j).docID) {

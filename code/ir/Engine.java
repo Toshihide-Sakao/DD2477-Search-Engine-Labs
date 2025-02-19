@@ -68,7 +68,7 @@ public class Engine {
     public Engine( String[] args ) {
         decodeArgs( args );
         indexer = new Indexer( index, kgIndex, patterns_file );
-        searcher = new Searcher( index, kgIndex );
+        searcher = new Searcher( index, kgIndex);
         gui = new SearchGUI( this );
         gui.init();
         /* 
@@ -88,8 +88,11 @@ public class Engine {
                 long elapsedTime = System.currentTimeMillis() - startTime;
                 gui.displayInfoText( String.format( "Indexing done in %.1f seconds.", elapsedTime/1000.0 ));
                 index.cleanup();
+                searcher.getPageRank().compute();
             }
         } else {
+            // searcher
+            searcher.getPageRank().readPageRank();
             gui.displayInfoText( "Index is loaded from disk" );
         }
     }
