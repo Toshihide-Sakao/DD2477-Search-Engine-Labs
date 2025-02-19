@@ -137,46 +137,136 @@ public class PageRank {
 		// System.out.println(link.get(docNumber.get("5")).get(docNumber.get("1")));
 
 		a[0] = 1; // initial prob
-		// double BoJprob = BORED * 1 / numberOfDocs;
 		while (diff > EPSILON && maxIterations > counter) {
+			if (counter % 10 == 0) {
+				System.out.println("Iteration: " + counter + " Diff: " + diff);
+			}
+			
+			diff = 0.0;
+			a = normalize(a);
+			for (int i = 0; i < numberOfDocs; i++) {
+				aNext[i] = 0.0;
+			}
+
 			for (int i = 0; i < numberOfDocs; i++) { // rows (document from)
 				// if document has no outgoing links
-				if (out[i] == 0 /* || link.get(i) == null */) {
+				if (out[i] == 0 || link.get(i) == null) {
 					for (int j = 0; j < numberOfDocs; j++) {
-						aNext[i] = 1 / numberOfDocs;
+						aNext[j] += a[i] * 1 / numberOfDocs;
+						// System.out.println(aNext[j] + " " + a[i]);
 					}
 					continue;
 				}
-				
-				// double probbb = 1 / out[i];
-				int jCount = 0;
-				for (int j = 0; j < numberOfDocs; j++) { // columns (document to)
-					if (jCount == out[i]) {
-						break; // break when done
-					}
-					if (link.get(i).get(j) != null) {
-						double Gval = ((1 - BORED) * (1 / out[i])) + (BORED * 1 / numberOfDocs);
-						aNext[i] += a[j] * Gval;
-						jCount++;
-					}
+
+				for (int j : link.get(i).keySet()) { 
+					double Gval = ((1 - BORED) / out[i]) + (BORED / numberOfDocs);
+					aNext[j] += a[i] * Gval;
 				}
 				
-				// diff = TODO:
+				for (int j = 0; j < numberOfDocs; j++) {
+					if (link.get(i).get(j) == null) {
+						aNext[j] += a[i] * (BORED / numberOfDocs);
+					}
+				}
 			}
-			a = aNext;
+
+			normalize(aNext);
+			diff = man_diff(a, aNext);
+
+			for (int i = 0; i < numberOfDocs; i++) {
+				a[i] = aNext[i];
+			}
+
 			counter++;
 		}
 
-		// for (int i = 0; i < numberOfDocs; i++) {
-		// System.out.printf("%f ", a[i]);
-		// }
-		// System.out.println();
+		System.out.println("Iterations: " + counter);
+		System.out.println("Diff: " + diff);
 
+		print_top30(a);
+		// print largest value
+		// double max = 0;
+		// int maxIndex = 0;
 		// for (int i = 0; i < numberOfDocs; i++) {
-		// System.out.printf("%f ", aNext[i]);
+		// 	if (a[i] > max) {
+		// 		max = a[i];
+		// 		maxIndex = i;
+		// 	}
 		// }
-		System.out.println();
+		// System.out.println("highest: " + docName[maxIndex] + ": " + max + " outlinks: " + out[maxIndex]);
+		// System.out.println("245 is: " + ": " + a[docNumber.get("245")] + " outlinks: "
+		// 		+ out[docNumber.get("245")]);
+	}
 
+	private double man_diff(double[] a, double[] aNext) {
+		double diff = 0;
+		for (int i = 0; i < a.length; i++) {
+			diff += Math.abs(aNext[i] - a[i]); // manhattan
+		}
+		// System.out.println("Diff: " + diff);
+		return diff;
+	}
+
+	private double euc_diff(double[] a, double[] aNext) {
+		double diff = 0;
+		for (int i = 0; i < a.length; i++) {
+			diff += (aNext[i] - a[i])*(aNext[i] - a[i]);
+		}
+		// System.out.println("Diff: " + diff);
+		return Math.sqrt(diff);
+	}
+
+	private double[] normalize(double[] a) {
+		double sum = 0;
+		for (int i = 0; i < a.length; i++) {
+			sum += a[i];
+		}
+		// System.out.println("Sum: " + sum);
+		for (int i = 0; i < a.length; i++) {
+			a[i] = a[i] / sum;
+		}
+
+		return a;
+	}
+
+	private void print_top30(double[] a) {
+		int[] top30 = new int[30];
+		double[] top30Val = new double[30];
+
+		// Initialize with minimum values
+		Arrays.fill(top30Val, -1);
+
+		for (int i = 0; i < a.length; i++) {
+			// Check if `a[i]` belongs in the top 30
+			if (a[i] > top30Val[29]) { // Compare with the smallest value in the top 30
+				top30Val[29] = a[i];
+				top30[29] = i;
+
+				// Sort top30Val in descending order while maintaining the index mapping
+				for (int j = 28; j >= 0; j--) {
+					if (top30Val[j] < top30Val[j + 1]) {
+						// Swap values
+						double tempVal = top30Val[j];
+						top30Val[j] = top30Val[j + 1];
+						top30Val[j + 1] = tempVal;
+
+						// Swap indices
+						int tempIndex = top30[j];
+						top30[j] = top30[j + 1];
+						top30[j + 1] = tempIndex;
+					} else {
+						break;
+					}
+				}
+			}
+		}
+
+		System.out.println("Top 30 documents:");
+		for (int i = 0; i < 30; i++) {
+			if (top30Val[i] > -1) { // Ensure valid values are printed
+				System.out.println(docName[top30[i]] + ": " + top30Val[i]);
+			}
+		}
 	}
 
 	/* --------------------------------------------- */
