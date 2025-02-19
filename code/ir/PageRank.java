@@ -1,3 +1,5 @@
+package ir;
+
 import java.util.*;
 import java.io.*;
 
@@ -117,6 +119,19 @@ public class PageRank {
 		}
 		System.err.println("Read " + fileIndex + " number of documents");
 		return fileIndex;
+	}
+
+	// FIX:
+	void writeToFile(String filename) {
+		try {
+			PrintWriter writer = new PrintWriter(filename, "UTF-8");
+			for (int i = 0; i < docName.length; i++) {
+				writer.println(docName[i]);
+			}
+			writer.close();
+		} catch (IOException e) {
+			System.err.println("Error writing to file " + filename);
+		}
 	}
 
 	/* --------------------------------------------- */
@@ -269,13 +284,15 @@ public class PageRank {
 		}
 	}
 
+	
+
 	/* --------------------------------------------- */
 
-	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.err.println("Please give the name of the link file");
-		} else {
-			new PageRank(args[0]);
-		}
-	}
+	// public static void main(String[] args) {
+	// 	if (args.length != 1) {
+	// 		System.err.println("Please give the name of the link file");
+	// 	} else {
+	// 		new PageRank(args[0]);
+	// 	}
+	// }
 }

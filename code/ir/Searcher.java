@@ -45,7 +45,7 @@ public class Searcher {
             case INTERSECTION_QUERY:
                 return IntersectAll(query);
             case RANKED_QUERY:
-                return RankedAll(query);
+                return RankedAll(query, rankingType);
                 // return Ranked(query, 0);
             default:
                 break;
@@ -54,10 +54,25 @@ public class Searcher {
         return null;
     }
 
-    private PostingsList RankedAll(Query query) {
-        PostingsList answer = Ranked(query, 0);
+    private PostingsList RankedAll(Query query, RankingType rankingType) {
+        switch (rankingType) {
+            case TF_IDF:
+                return RankedAll_TF_IDF(query);
+            case PAGERANK:
+                break;
+            case COMBINATION:
+                break;
+            default:
+                break;
+        }
+
+        return new PostingsList();
+    }
+
+    private PostingsList RankedAll_TF_IDF(Query query) {
+        PostingsList answer = Ranked_TF_IDF(query, 0);
         for (int i = 1; i < query.queryterm.size(); i++) {
-            PostingsList next = Ranked(query, i);
+            PostingsList next = Ranked_TF_IDF(query, i);
             answer.merge(next);
         }
         
@@ -65,7 +80,7 @@ public class Searcher {
         return answer;
     }
 
-    private PostingsList Ranked(Query query, int j) {
+    private PostingsList Ranked_TF_IDF(Query query, int j) {
         int N = Index.docNames.size();
         PostingsList answer = index.getPostings(query.queryterm.get(j).term);
         int df_t = answer.size();

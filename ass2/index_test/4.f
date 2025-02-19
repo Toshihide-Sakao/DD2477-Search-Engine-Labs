@@ -1,1 +1,0 @@
-the green ball is next to the yellow ball
