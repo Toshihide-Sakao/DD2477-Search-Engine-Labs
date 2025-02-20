@@ -22,7 +22,7 @@ public interface Index {
     /** Mapping from document identifier to document length. */
     public HashMap<Integer,Integer> docLengths = new HashMap<Integer,Integer>();
 
-    public PageRank pagerank = null;
+    public HashMap<Integer,Double> docEucLengths = new HashMap<Integer,Double>();
 
     /** Inserts a token into the index. */
     public void insert( String token, int docID, int offset );
@@ -32,6 +32,8 @@ public interface Index {
 
     /** This method is called on exit. */
     public void cleanup();
+
+    public HashMap<String, PostingsList> getLoadedIndex();
 
 }
 

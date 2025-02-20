@@ -49,7 +49,7 @@ public class Searcher {
             case INTERSECTION_QUERY:
                 return IntersectAll(query);
             case RANKED_QUERY:
-                return RankedAll(query, rankingType);
+                return RankedAll(query, rankingType, normType);
             // return Ranked(query, 0);
             default:
                 break;
@@ -58,15 +58,15 @@ public class Searcher {
         return null;
     }
 
-    private PostingsList RankedAll(Query query, RankingType rankingType) {
+    private PostingsList RankedAll(Query query, RankingType rankingType, NormalizationType normType) {
         switch (rankingType) {
             case TF_IDF:
-                return RankedAllTF_IDF(query);
+                return RankedAllTF_IDF(query, normType);
             case PAGERANK:
                 return RankedAllPageRank(query);
             // return RankedPageRank(query, 0);
             case COMBINATION:
-                return RankedAllComb(query, 1000, 1);
+                return RankedAllComb(query, normType, 1000, 1);
             default:
                 break;
         }
@@ -74,9 +74,9 @@ public class Searcher {
         return new PostingsList();
     }
 
-    private PostingsList RankedAllComb(Query query, double prMult, double tfidfMult) {
+    private PostingsList RankedAllComb(Query query, NormalizationType normType, double prMult, double tfidfMult) {
         PostingsList answerPR = RankedAllPageRank(query);
-        PostingsList answerTF_IDF = RankedAllTF_IDF(query);
+        PostingsList answerTF_IDF = RankedAllTF_IDF(query, normType);
         PostingsList answer = Combine(answerPR, answerTF_IDF, prMult, tfidfMult);
 
         answer.sort();
@@ -111,9 +111,7 @@ public class Searcher {
     private PostingsList RankedPageRank(Query query, int j) {
         PostingsList answer = index.getPostings(query.queryterm.get(j).term);
         for (int i = 0; i < answer.size(); i++) {
-            String docFile = index.docNames.get(answer.get(i).docID).substring("./../davisWiki/".length()); // FIX: now
-                                                                                                            // it is
-                                                                                                            // hardcode
+            String docFile = index.docNames.get(answer.get(i).docID).substring("./../davisWiki/".length()); // FIX: now it is hardcod
             // System.out.println("DEBUG: docFile: " + docFile);
             double score = pagerank.getScore(docFile);
             answer.get(i).setScore(score);
@@ -122,10 +120,10 @@ public class Searcher {
         return answer;
     }
 
-    private PostingsList RankedAllTF_IDF(Query query) {
-        PostingsList answer = RankedTF_IDF(query, 0);
+    private PostingsList RankedAllTF_IDF(Query query, NormalizationType normType) {
+        PostingsList answer = RankedTF_IDF(query, 0, normType);
         for (int i = 1; i < query.queryterm.size(); i++) {
-            PostingsList next = RankedTF_IDF(query, i);
+            PostingsList next = RankedTF_IDF(query, i, normType);
             answer.merge(next, 0);
         }
 
@@ -133,7 +131,7 @@ public class Searcher {
         return answer;
     }
 
-    private PostingsList RankedTF_IDF(Query query, int j) {
+    private PostingsList RankedTF_IDF(Query query, int j, NormalizationType normType) {
         int N = Index.docNames.size();
         PostingsList answer = index.getPostings(query.queryterm.get(j).term);
         int df_t = answer.size();
@@ -142,7 +140,14 @@ public class Searcher {
 
         for (int i = 0; i < df_t; i++) {
             int tf_dt = answer.get(i).getOffsets().size();
-            int len_d = Index.docLengths.get(answer.get(i).docID);
+
+            double len_d = 0;
+            if (normType == NormalizationType.NUMBER_OF_WORDS) {
+                len_d = Index.docLengths.get(answer.get(i).docID);
+            } else {
+                len_d = Index.docEucLengths.get(answer.get(i).docID);
+            }
+
 
             double tf_idf_dt = tf_dt * idf_t / (double) len_d;
             answer.get(i).setScore(tf_idf_dt);

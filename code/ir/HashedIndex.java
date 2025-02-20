@@ -43,4 +43,8 @@ public class HashedIndex implements Index {
      */
     public void cleanup() {
     }
+
+    public HashMap<String, PostingsList> getLoadedIndex() {
+        return index;
+    }
 }

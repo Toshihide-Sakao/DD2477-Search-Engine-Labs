@@ -266,11 +266,11 @@ public class PersistentHashedIndex implements Index {
      *
      * @throws IOException { exception_description }
      */
-    private void writeDocInfo() throws IOException {
+    public void writeDocInfo() throws IOException {
         FileOutputStream fout = new FileOutputStream(INDEXDIR + "/docInfo");
         for (Map.Entry<Integer, String> entry : docNames.entrySet()) {
             Integer key = entry.getKey();
-            String docInfoEntry = key + ";" + entry.getValue() + ";" + docLengths.get(key) + "\n";
+            String docInfoEntry = key + ";" + entry.getValue() + ";" + docLengths.get(key) + ";" + docEucLengths.getOrDefault(key, 0.0) + "\n";
             fout.write(docInfoEntry.getBytes());
         }
         fout.close();
@@ -291,6 +291,7 @@ public class PersistentHashedIndex implements Index {
                 String[] data = line.split(";");
                 docNames.put(new Integer(data[0]), data[1]);
                 docLengths.put(new Integer(data[0]), new Integer(data[2]));
+                docEucLengths.put(new Integer(data[0]), new Double(data[3]));
             }
         }
         freader.close();
@@ -370,6 +371,10 @@ public class PersistentHashedIndex implements Index {
         // return null;
     }
 
+    public HashMap<String, PostingsList> getLoadedIndex() {
+        return index;
+    }
+
     /**
      * Inserts this token in the main-memory hashtable.
      */
@@ -387,16 +392,11 @@ public class PersistentHashedIndex implements Index {
      */
     public void cleanup() {
         System.err.println(index.keySet().size() + " unique words");
+
         // TODO: uncomment these later
-        // System.err.print("Writing index to disk...");
-        // writeIndex();
+        System.err.print("Writing index to disk...");
+        writeIndex();
 
-
-        // add pagerank computation
-        // System.err.println("Computing and writing pagerank...");
-        // pagerank = new PageRank();
-        // pagerank.compute();
-
-        // System.err.println("done!");
+        System.err.println("done!");
     }
 }
