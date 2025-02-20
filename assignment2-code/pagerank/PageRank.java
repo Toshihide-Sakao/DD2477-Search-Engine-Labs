@@ -51,6 +51,9 @@ public class PageRank {
 	 */
 	final static double EPSILON = 0.0001;
 
+	// Monte Carlo c:
+	final static double C = 0.85;
+
 	/* --------------------------------------------- */
 
 	public PageRank(String filename) {
@@ -184,18 +187,24 @@ public class PageRank {
 		System.out.println("Diff: " + diff);
 
 		print_top30(a);
-		// print largest value
-		// double max = 0;
-		// int maxIndex = 0;
-		// for (int i = 0; i < numberOfDocs; i++) {
-		// 	if (a[i] > max) {
-		// 		max = a[i];
-		// 		maxIndex = i;
-		// 	}
-		// }
-		// System.out.println("highest: " + docName[maxIndex] + ": " + max + " outlinks: " + out[maxIndex]);
-		// System.out.println("245 is: " + ": " + a[docNumber.get("245")] + " outlinks: "
-		// 		+ out[docNumber.get("245")]);
+	}
+
+	// Monte Carlo 1
+	void iterateMC1(int numberOfDocs, int maxIterations) {
+		double[] a = new double[numberOfDocs];
+
+		Random rand = new Random();
+		// int initPos = rand.nextInt(numberOfDocs);
+
+		// start at doc 0
+		a[0] = 1;
+
+		// all edges that can be taken from a node
+
+	}
+
+	void randomWalk() {
+
 	}
 
 	private double man_diff(double[] a, double[] aNext) {
