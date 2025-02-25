@@ -1,5 +1,6 @@
 import java.util.*;
 import java.io.*;
+import java.sql.Array;
 
 public class PageRank {
 
@@ -58,7 +59,11 @@ public class PageRank {
 
 	public PageRank(String filename) {
 		int noOfDocs = readDocs(filename);
-		iterate(noOfDocs, 1000);
+		// iterate(noOfDocs, 1000);
+		iterateMC1(noOfDocs, 100000);
+		// iterateMC2(noOfDocs, 10);
+		// iterateMC4(noOfDocs, 20);
+		// iterateMC5(noOfDocs, 100000);
 	}
 
 	/* --------------------------------------------- */
@@ -129,8 +134,6 @@ public class PageRank {
 	 * aP, aP^2, aP^3... until aP^i = aP^(i+1).
 	 */
 	void iterate(int numberOfDocs, int maxIterations) {
-
-		// YOUR CODE HERE
 		double[] a = new double[numberOfDocs];
 		double[] aNext = new double[numberOfDocs];
 
@@ -144,12 +147,10 @@ public class PageRank {
 			if (counter % 10 == 0) {
 				System.out.println("Iteration: " + counter + " Diff: " + diff);
 			}
-			
+
 			diff = 0.0;
 			a = normalize(a);
-			for (int i = 0; i < numberOfDocs; i++) {
-				aNext[i] = 0.0;
-			}
+			Arrays.fill(aNext, 0.0);
 
 			for (int i = 0; i < numberOfDocs; i++) { // rows (document from)
 				// if document has no outgoing links
@@ -165,7 +166,7 @@ public class PageRank {
 					double Gval = ((1 - BORED) / out[i]) + (BORED / numberOfDocs);
 					aNext[j] += a[i] * Gval;
 				}
-				
+
 				for (int j = 0; j < numberOfDocs; j++) {
 					if (link.get(i).get(j) == null) {
 						aNext[j] += a[i] * (BORED / numberOfDocs);
@@ -190,21 +191,99 @@ public class PageRank {
 	}
 
 	// Monte Carlo 1
-	void iterateMC1(int numberOfDocs, int maxIterations) {
-		double[] a = new double[numberOfDocs];
+	void iterateMC1(int numberOfDocs, int N) {
+		double[] rank = new double[numberOfDocs];
+		Arrays.fill(rank, 0.0);
 
 		Random rand = new Random();
-		// int initPos = rand.nextInt(numberOfDocs);
+		for (int i = 0; i < N; i++) {
+			int initPos = rand.nextInt(numberOfDocs);
+			rank = randomWalk(numberOfDocs, initPos, rank, false, new int[]{0});
+		}
 
-		// start at doc 0
-		a[0] = 1;
+		for (int i = 0; i < numberOfDocs; i++) {
+			rank[i] = rank[i] / N;
+		}
 
-		// all edges that can be taken from a node
-
+		print_top30(rank);
 	}
 
-	void randomWalk() {
+	void iterateMC2(int numberOfDocs, int N) {
+		double[] rank = new double[numberOfDocs];
+		Arrays.fill(rank, 0.0);
 
+		for (int i = 0; i < N; i++) {
+			for (int m = 0; m < numberOfDocs; m++) {
+				rank = randomWalk(numberOfDocs, m, rank, false, new int[]{0});
+			}
+		}
+
+		for (int i = 0; i < numberOfDocs; i++) {
+			rank[i] = rank[i] / N;
+		}
+
+		print_top30(rank);
+	}
+
+	void iterateMC4(int numberOfDocs, int N) {
+		double[] rank = new double[numberOfDocs];
+		Arrays.fill(rank, 0.0);
+		int[] totalVisits = { 1 };
+
+		for (int i = 0; i < N; i++) {
+			for (int m = 0; m < numberOfDocs; m++) {
+				rank = randomWalk(numberOfDocs, m, rank, true, totalVisits);
+			}
+		}
+
+		for (int i = 0; i < numberOfDocs; i++) {
+			rank[i] = rank[i] / totalVisits[0];
+		}
+
+		// System.out.println("Total visits: " + totalVisits);
+
+		print_top30(rank);
+	}
+
+	void iterateMC5(int numberOfDocs, int N) {
+		double[] rank = new double[numberOfDocs];
+		Arrays.fill(rank, 0.0);
+		int[] totalVisits = { 1 };
+
+		Random rand = new Random();
+		for (int i = 0; i < N; i++) {
+			int initPos = rand.nextInt(numberOfDocs);
+			rank = randomWalk(numberOfDocs, initPos, rank, true, totalVisits);
+		}
+
+		for (int i = 0; i < numberOfDocs; i++) {
+			rank[i] = rank[i] / totalVisits[0];
+		}
+
+		print_top30(rank);
+	}
+
+	double[] randomWalk(int numberOfDocs, int start, double[] rank, boolean stopWhenDangle, int[] totalVisits) {
+		Random rand = new Random();
+		rank[start]++;
+		int next = start;
+		while (rand.nextInt(Integer.MAX_VALUE) <= C * Integer.MAX_VALUE) {
+			if (link.get(next) == null || link.get(next).isEmpty()) { // if no outgoings just jump
+				next = rand.nextInt(numberOfDocs);
+			} else {
+				next = (int) link.get(next).keySet().toArray()[rand.nextInt(link.get(next).size())];
+			}
+
+			if (stopWhenDangle) {
+				totalVisits[0]++;
+				rank[next]++;
+			}
+		}
+
+		if (!stopWhenDangle) {
+			rank[next]++;
+		}
+		return rank;
 	}
 
 	private double man_diff(double[] a, double[] aNext) {
@@ -219,7 +298,7 @@ public class PageRank {
 	private double euc_diff(double[] a, double[] aNext) {
 		double diff = 0;
 		for (int i = 0; i < a.length; i++) {
-			diff += (aNext[i] - a[i])*(aNext[i] - a[i]);
+			diff += (aNext[i] - a[i]) * (aNext[i] - a[i]);
 		}
 		// System.out.println("Diff: " + diff);
 		return Math.sqrt(diff);
@@ -270,7 +349,7 @@ public class PageRank {
 			}
 		}
 
-		System.out.println("Top 30 documents:");
+		// System.out.println("Top 30 documents:");
 		for (int i = 0; i < 30; i++) {
 			if (top30Val[i] > -1) { // Ensure valid values are printed
 				System.out.println(docName[top30[i]] + ": " + top30Val[i]);
