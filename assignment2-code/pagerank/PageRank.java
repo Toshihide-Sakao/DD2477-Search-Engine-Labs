@@ -59,11 +59,44 @@ public class PageRank {
 
 	public PageRank(String filename) {
 		int noOfDocs = readDocs(filename);
+		// int[] davisTop30real = readDavisTop30("davis_top_30.txt");
+
 		// iterate(noOfDocs, 1000);
-		iterateMC1(noOfDocs, 100000);
-		// iterateMC2(noOfDocs, 10);
-		// iterateMC4(noOfDocs, 20);
-		// iterateMC5(noOfDocs, 100000);
+		// int[] davisMC1 = iterateMC1(noOfDocs, noOfDocs * 10);
+		// int[] davisMC2 = iterateMC2(noOfDocs, 10);
+		// int[] davisMC3 = iterateMC4(noOfDocs, 10);
+		int[] davisMC4 = iterateMC5(noOfDocs, noOfDocs * 24);
+
+		// System.out.println("Goodness MC1: " + calcGoodness(davisMC1, davisTop30real));
+		// System.out.println("Goodness MC2: " + calcGoodness(davisMC2, davisTop30real));
+		// System.out.println("Goodness MC4: " + calcGoodness(davisMC3, davisTop30real));
+		// System.out.println("Goodness MC5: " + calcGoodness(davisMC4, davisTop30real));
+
+		// Iteration
+		// int N = 1;
+		// int[] lastTop = iterateMC5(noOfDocs, noOfDocs * N);
+		// while (true) {
+		// 	N++;
+		// 	int[] top = iterateMC5(noOfDocs, noOfDocs * N);
+		// 	if (Arrays.equals(lastTop, top)) {
+		// 		break;
+		// 	}
+		// 	lastTop = top;
+		// 	System.err.println("N: " + N);
+		// }
+
+		// System.err.println("N: " + N);
+		// System.err.println("noOfDocs * N: " + (noOfDocs * N));
+
+		// int topN = 100;
+		// double[] goodnessMC1 = allGoodness(1, noOfDocs, davisTop30real, topN);
+		// double[] goodnessMC2 = allGoodness(2, noOfDocs, davisTop30real, topN);
+		// double[] goodnessMC4 = allGoodness(3, noOfDocs, davisTop30real, topN);
+		// double[] goodnessMC5 = allGoodness(4, noOfDocs, davisTop30real, topN);
+
+		// for (int i = 0; i < goodnessMC1.length; i++) {
+		// 	System.out.printf(goodnessMC1[i] + "\t" + goodnessMC2[i] + "\t" + goodnessMC4[i] + "\t" + goodnessMC5[i] + "\n");
+		// }
 	}
 
 	/* --------------------------------------------- */
@@ -133,7 +166,7 @@ public class PageRank {
 	 * Chooses a probability vector a, and repeatedly computes
 	 * aP, aP^2, aP^3... until aP^i = aP^(i+1).
 	 */
-	void iterate(int numberOfDocs, int maxIterations) {
+	int[] iterate(int numberOfDocs, int maxIterations) {
 		double[] a = new double[numberOfDocs];
 		double[] aNext = new double[numberOfDocs];
 
@@ -187,34 +220,34 @@ public class PageRank {
 		System.out.println("Iterations: " + counter);
 		System.out.println("Diff: " + diff);
 
-		print_top30(a);
+		return print_top30(a);
 	}
 
 	// Monte Carlo 1
-	void iterateMC1(int numberOfDocs, int N) {
+	int[] iterateMC1(int numberOfDocs, int N) {
 		double[] rank = new double[numberOfDocs];
 		Arrays.fill(rank, 0.0);
 
 		Random rand = new Random();
 		for (int i = 0; i < N; i++) {
 			int initPos = rand.nextInt(numberOfDocs);
-			rank = randomWalk(numberOfDocs, initPos, rank, false, new int[]{0});
+			rank = randomWalk(numberOfDocs, initPos, rank, false, new int[] { 0 });
 		}
 
 		for (int i = 0; i < numberOfDocs; i++) {
 			rank[i] = rank[i] / N;
 		}
 
-		print_top30(rank);
+		return print_top30(rank);
 	}
 
-	void iterateMC2(int numberOfDocs, int N) {
+	int[] iterateMC2(int numberOfDocs, int N) {
 		double[] rank = new double[numberOfDocs];
 		Arrays.fill(rank, 0.0);
 
 		for (int i = 0; i < N; i++) {
 			for (int m = 0; m < numberOfDocs; m++) {
-				rank = randomWalk(numberOfDocs, m, rank, false, new int[]{0});
+				rank = randomWalk(numberOfDocs, m, rank, false, new int[] { 0 });
 			}
 		}
 
@@ -222,10 +255,10 @@ public class PageRank {
 			rank[i] = rank[i] / N;
 		}
 
-		print_top30(rank);
+		return print_top30(rank);
 	}
 
-	void iterateMC4(int numberOfDocs, int N) {
+	int[] iterateMC4(int numberOfDocs, int N) {
 		double[] rank = new double[numberOfDocs];
 		Arrays.fill(rank, 0.0);
 		int[] totalVisits = { 1 };
@@ -242,10 +275,10 @@ public class PageRank {
 
 		// System.out.println("Total visits: " + totalVisits);
 
-		print_top30(rank);
+		return print_top30(rank);
 	}
 
-	void iterateMC5(int numberOfDocs, int N) {
+	int[] iterateMC5(int numberOfDocs, int N) {
 		double[] rank = new double[numberOfDocs];
 		Arrays.fill(rank, 0.0);
 		int[] totalVisits = { 1 };
@@ -260,7 +293,7 @@ public class PageRank {
 			rank[i] = rank[i] / totalVisits[0];
 		}
 
-		print_top30(rank);
+		return print_top30(rank);
 	}
 
 	double[] randomWalk(int numberOfDocs, int start, double[] rank, boolean stopWhenDangle, int[] totalVisits) {
@@ -284,6 +317,70 @@ public class PageRank {
 			rank[next]++;
 		}
 		return rank;
+	}
+
+	int[] readDavisTop30(String filename) {
+		int[] top30titles = new int[30];
+
+		try {
+			BufferedReader in = new BufferedReader(new FileReader(filename));
+			String line;
+			for (int i = 0; i < 30; i++) {
+				line = in.readLine();
+				int index = line.indexOf(":");
+				String title = line.substring(0, index);
+				top30titles[i] = docNumber.get(title);
+			}
+		} catch (FileNotFoundException e) {
+			System.err.println("File " + filename + " not found!");
+		} catch (IOException e) {
+			System.err.println("Error reading file " + filename);
+		}
+
+		return top30titles;
+	}
+
+	double calcGoodness(int[] top30, int[] top30real) {
+		double sum = 0;
+		boolean exists = false;
+		for (int i = 0; i < 30; i++) {
+			for (int j = 0; j < 30; j++) {
+				if (top30[i] == top30real[j]) {
+					sum += (i - j) * (i - j);
+					exists = true;
+					break;
+				}
+			}
+			if (!exists) {
+				sum += 30 * 30;
+			}
+		}
+
+		return sum;
+	}
+
+	double[] allGoodness(int choice, int noOfDocs, int[] davisTop30real, int topN) {
+		int[] top30 = new int[30];
+		double[] goodness = new double[topN];
+		for (int i = 0; i < topN; i++) {
+			switch (choice) {
+				case 1:
+					top30 = iterateMC1(noOfDocs, noOfDocs * i);
+					break;
+				case 2:
+					top30 = iterateMC2(noOfDocs, i);
+					break;
+				case 3:
+					top30 = iterateMC4(noOfDocs, i);
+					break;
+				case 4:
+					top30 = iterateMC5(noOfDocs, noOfDocs * 10);
+					break;
+			}
+			goodness[i] = calcGoodness(top30, davisTop30real);
+		}
+
+		return goodness;
 	}
 
 	private double man_diff(double[] a, double[] aNext) {
@@ -317,31 +414,26 @@ public class PageRank {
 		return a;
 	}
 
-	private void print_top30(double[] a) {
+	private int[] print_top30(double[] a) {
 		int[] top30 = new int[30];
 		double[] top30Val = new double[30];
 
-		// Initialize with minimum values
 		Arrays.fill(top30Val, -1);
 
 		for (int i = 0; i < a.length; i++) {
-			// Check if `a[i]` belongs in the top 30
-			if (a[i] > top30Val[29]) { // Compare with the smallest value in the top 30
+			if (a[i] > top30Val[29]) {
 				top30Val[29] = a[i];
 				top30[29] = i;
 
-				// Sort top30Val in descending order while maintaining the index mapping
 				for (int j = 28; j >= 0; j--) {
 					if (top30Val[j] < top30Val[j + 1]) {
-						// Swap values
-						double tempVal = top30Val[j];
+						double tmpVal = top30Val[j];
 						top30Val[j] = top30Val[j + 1];
-						top30Val[j + 1] = tempVal;
+						top30Val[j + 1] = tmpVal;
 
-						// Swap indices
-						int tempIndex = top30[j];
+						int tmpIndex = top30[j];
 						top30[j] = top30[j + 1];
-						top30[j + 1] = tempIndex;
+						top30[j + 1] = tmpIndex;
 					} else {
 						break;
 					}
@@ -351,10 +443,10 @@ public class PageRank {
 
 		// System.out.println("Top 30 documents:");
 		for (int i = 0; i < 30; i++) {
-			if (top30Val[i] > -1) { // Ensure valid values are printed
-				System.out.println(docName[top30[i]] + ": " + top30Val[i]);
-			}
+			System.out.println(docName[top30[i]] + ": " + top30Val[i]);
 		}
+
+		return top30;
 	}
 
 	/* --------------------------------------------- */
