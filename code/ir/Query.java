@@ -111,9 +111,7 @@ public class Query {
      *  @param engine The search engine object
      */
     public void relevanceFeedback( PostingsList results, boolean[] docIsRelevant, Engine engine ) {
-        //
-        //  YOUR CODE HERE
-        //
+        
     }
 }
 
