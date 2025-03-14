@@ -64,8 +64,8 @@ public class PageRank {
 		// iterate(noOfDocs, 1000);
 		// int[] davisMC1 = iterateMC1(noOfDocs, noOfDocs * 10);
 		// int[] davisMC2 = iterateMC2(noOfDocs, 10);
-		// int[] davisMC3 = iterateMC4(noOfDocs, 10);
-		int[] davisMC4 = iterateMC5(noOfDocs, noOfDocs * 24);
+		int[] davisMC3 = iterateMC4(noOfDocs, 10);
+		// int[] davisMC4 = iterateMC5(noOfDocs, noOfDocs * 24);
 
 		// System.out.println("Goodness MC1: " + calcGoodness(davisMC1, davisTop30real));
 		// System.out.println("Goodness MC2: " + calcGoodness(davisMC2, davisTop30real));
@@ -301,8 +301,12 @@ public class PageRank {
 		rank[start]++;
 		int next = start;
 		while (rand.nextInt(Integer.MAX_VALUE) <= C * Integer.MAX_VALUE) {
-			if (link.get(next) == null || link.get(next).isEmpty()) { // if no outgoings just jump
-				next = rand.nextInt(numberOfDocs);
+			if ((link.get(next) == null || link.get(next).isEmpty())) { // if no outgoings just jump
+				if (!stopWhenDangle) {
+					next = rand.nextInt(numberOfDocs);
+				} else {
+					break;
+				}
 			} else {
 				next = (int) link.get(next).keySet().toArray()[rand.nextInt(link.get(next).size())];
 			}
