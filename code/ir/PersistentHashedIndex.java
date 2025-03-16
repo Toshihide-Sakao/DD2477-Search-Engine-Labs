@@ -90,6 +90,9 @@ public class PersistentHashedIndex implements Index {
             if (list.length == 0 || ptr == -1 || list[0].equals("")) {
                 return postings;
             }
+            if (list[0].equals("rs")) {
+                System.err.println("List: " + list[0] + " token: " + token);
+            }
 
             int size = Integer.parseInt(list[0]); // number of postings
             for (int i = 1; i <= size; i++) {
@@ -222,7 +225,7 @@ public class PersistentHashedIndex implements Index {
             String data = "";
             long entryptr = 0;
             int counter = 1;
-            while (!data.startsWith(token)) {
+            while (!data.startsWith(token + ";")) {
                 // System.out.println("Reading at: " + ptr);
                 dictionaryFile.seek(ptr);
                 byte[] dataptr = new byte[Long.BYTES];

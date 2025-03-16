@@ -35,7 +35,7 @@ public class Searcher {
      * @return A postings list representing the result of the query.
      */
     public PostingsList search(Query query, QueryType queryType, RankingType rankingType, NormalizationType normType) {
-        if (query.queryterm == null) {
+        if (query.queryterm == null || query.queryterm.size() == 0) {
             return null;
         }
         PrintSearchedTerms(query);
@@ -114,7 +114,8 @@ public class Searcher {
             String docFile = index.docNames.get(answer.get(i).docID).substring("./../davisWiki/".length()); // FIX: now it is hardcod
             // System.out.println("DEBUG: docFile: " + docFile);
             double score = pagerank.getScore(docFile);
-            answer.get(i).setScore(score);
+            // answer.get(i).setScore(score);
+            answer.get(i).setScore(score * query.queryterm.get(j).weight);
         }
 
         return answer;
@@ -149,7 +150,7 @@ public class Searcher {
             }
 
 
-            double tf_idf_dt = tf_dt * idf_t / (double) len_d;
+            double tf_idf_dt = tf_dt * idf_t * query.queryterm.get(j).weight / (double) len_d;
             answer.get(i).setScore(tf_idf_dt);
         }
         return answer;
