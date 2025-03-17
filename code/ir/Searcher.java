@@ -8,6 +8,7 @@
 package ir;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Searches an index for results of a query.
@@ -88,7 +89,7 @@ public class Searcher {
         for (int i = 0; i < a.size(); i++) {
             for (int j = 0; j < b.size(); j++) {
                 if (a.get(i).docID == b.get(j).docID) {
-                    double score = aMult * a.get(i).score + bMult* b.get(j).score;
+                    double score = aMult * a.get(i).score + bMult * b.get(j).score;
                     answer.add(a.get(i).docID, 0, score);
                 }
             }
@@ -99,6 +100,9 @@ public class Searcher {
 
     private PostingsList RankedAllPageRank(Query query) {
         PostingsList answer = RankedPageRank(query, 0);
+        if (answer == null) {
+            answer = new PostingsList();
+        }
         for (int i = 1; i < query.queryterm.size(); i++) {
             PostingsList next = RankedPageRank(query, i);
             answer.merge(next, 1);
@@ -109,9 +113,11 @@ public class Searcher {
     }
 
     private PostingsList RankedPageRank(Query query, int j) {
-        PostingsList answer = index.getPostings(query.queryterm.get(j).term);
+        PostingsList answer = getWildPostings(query.queryterm.get(j).term);
         for (int i = 0; i < answer.size(); i++) {
-            String docFile = index.docNames.get(answer.get(i).docID).substring("./../davisWiki/".length()); // FIX: now it is hardcod
+            String docFile = index.docNames.get(answer.get(i).docID).substring("./../davisWiki/".length()); // FIX: now
+                                                                                                            // it is
+                                                                                                            // hardcod
             // System.out.println("DEBUG: docFile: " + docFile);
             double score = pagerank.getScore(docFile);
             // answer.get(i).setScore(score);
@@ -123,6 +129,9 @@ public class Searcher {
 
     private PostingsList RankedAllTF_IDF(Query query, NormalizationType normType) {
         PostingsList answer = RankedTF_IDF(query, 0, normType);
+        if (answer == null) {
+            answer = new PostingsList();
+        }
         for (int i = 1; i < query.queryterm.size(); i++) {
             PostingsList next = RankedTF_IDF(query, i, normType);
             answer.merge(next, 0);
@@ -134,7 +143,7 @@ public class Searcher {
 
     private PostingsList RankedTF_IDF(Query query, int j, NormalizationType normType) {
         int N = Index.docNames.size();
-        PostingsList answer = index.getPostings(query.queryterm.get(j).term);
+        PostingsList answer = getWildPostings(query.queryterm.get(j).term);
         int df_t = answer.size();
         double idf_t = Math.log((double) N / (double) df_t);
         // System.out.println("DEBUG: idf_t: " + idf_t);
@@ -149,7 +158,6 @@ public class Searcher {
                 len_d = Index.docEucLengths.get(answer.get(i).docID);
             }
 
-
             double tf_idf_dt = tf_dt * idf_t * query.queryterm.get(j).weight / (double) len_d;
             answer.get(i).setScore(tf_idf_dt);
         }
@@ -159,9 +167,12 @@ public class Searcher {
     // 4 elements
     // e.g. 0 to 1, 1 to 2, 2 to 3
     private PostingsList IntersectAll(Query query) {
-        PostingsList answer = index.getPostings(query.queryterm.get(0).term);
+        PostingsList answer = getWildPostings(query.queryterm.get(0).term);
+        if (answer == null) {
+            answer = new PostingsList();
+        }
         for (int i = 1; i < query.queryterm.size(); i++) {
-            PostingsList next = index.getPostings(query.queryterm.get(i).term);
+            PostingsList next = getWildPostings(query.queryterm.get(i).term);
             if (next == null) { // TEST:
                 continue;
             }
@@ -192,9 +203,15 @@ public class Searcher {
     }
 
     private PostingsList ContiguousAll(Query query) {
-        PostingsList answer = index.getPostings(query.queryterm.get(0).term);
+        PostingsList answer = getWildPostings(query.queryterm.get(0).term);
+        // PostingsList answer = index.getPostings(query.queryterm.get(0).term);
+        if (answer == null) {
+            answer = new PostingsList();
+        }
         for (int i = 1; i < query.queryterm.size(); i++) {
-            PostingsList next = index.getPostings(query.queryterm.get(i).term);
+            PostingsList next = getWildPostings(query.queryterm.get(i).term);
+            // PostingsList next = index.getPostings(query.queryterm.get(i).term);
+
             if (next == null) {
                 continue;
             }
@@ -241,6 +258,61 @@ public class Searcher {
         }
 
         return answer;
+    }
+
+    private PostingsList UnionAll(Query query) {
+        PostingsList answer = index.getPostings(query.queryterm.get(0).term);
+        if (answer == null) {
+            answer = new PostingsList();
+        }
+        for (int i = 1; i < query.queryterm.size(); i++) {
+            PostingsList next = index.getPostings(query.queryterm.get(i).term);
+            if (next == null) {
+                continue;
+            }
+            answer.merge(next, 0);
+        }
+
+        return answer;
+    }
+
+    private PostingsList getWildPostings(String token) {
+        int starIndex = token.indexOf("*");
+        if (starIndex == -1) {
+            return index.getPostings(token);
+        }
+        Query expanded = expandWild(token, starIndex);
+
+        PrintSearchedTerms(expanded);
+        PostingsList answer = UnionAll(expanded);
+        System.err.println("DEBUG: expanded answer size: " + answer.size());
+
+        return answer;
+    }
+
+    private Query expandWild(String token, int starIndex) {
+        Query expanded = new Query();
+        String[] kStrings = new String[starIndex + 1 + 1 - kgIndex.K];
+        token = "$" + token + "$";
+        for (int j = kgIndex.K; j < starIndex + 1 + 1; j++) {
+            String kgram = token.substring(j - kgIndex.K, j);
+            kStrings[j - kgIndex.K] = kgram;
+
+            System.err.println("Inserting kgram: " + kgram);
+        }
+        addKGramsToQuery(expanded, kStrings);
+
+        return expanded;
+    }
+
+    public void addKGramsToQuery(Query query, String[] kStrings) {
+        List<KGramPostingsEntry> kgPostings = kgIndex.getIntersectAll(kStrings);
+        if (kgPostings == null) {
+            return;
+        }
+        for (int i = 0; i < kgPostings.size(); i++) {
+            query.addQueryTerm(kgIndex.id2term.get(kgPostings.get(i).tokenID));
+        }
     }
 
     private void PrintSearchedTerms(Query query) {

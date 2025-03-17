@@ -120,7 +120,7 @@ public class Indexer {
                 for (String t : uniqueTokens.keySet()) {
                     sum += Math.pow(uniqueTokens.get(t) * Math.log((double) N / (double)df_ts.get(t)), 2);
                 }
-                index.docEucLengths.put(docID, Math.sqrt(sum));
+                Index.docEucLengths.put(docID, Math.sqrt(sum));
                 // index.docEucLengths.put(docID,
                 // Math.sqrt(uniqueTokens.keySet().stream().map((t, i) -> Math.pow(i * (N /
                 // df_ts.get(t)), 2)).sum()));

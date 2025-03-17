@@ -292,9 +292,9 @@ public class PersistentHashedIndex implements Index {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(";");
-                docNames.put(new Integer(data[0]), data[1]);
-                docLengths.put(new Integer(data[0]), new Integer(data[2]));
-                docEucLengths.put(new Integer(data[0]), new Double(data[3]));
+                docNames.put(Integer.valueOf(data[0]), data[1]);
+                docLengths.put(Integer.valueOf(data[0]), Integer.valueOf(data[2]));
+                docEucLengths.put(Integer.valueOf(data[0]), Double.valueOf(data[3]));
             }
         }
         freader.close();

@@ -89,10 +89,10 @@ public class KGramIndex {
         term2id.put(token, id);
         id2term.put(id, token);
 
-        token = " " + token + " ";
+        token = "$" + token + "$";
         // (n - 2) + 3 - k + (k)
         for (int i = K; i < token.length() + 1; i++) {
-            String kgram = token.substring(i - K, i).trim();
+            String kgram = token.substring(i - K, i);
             //     System.err.println("Inserting kgram: " + kgram);
             if (index.containsKey(kgram)) {
                 entries = index.get(kgram);

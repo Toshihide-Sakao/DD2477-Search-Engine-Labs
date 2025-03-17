@@ -32,7 +32,6 @@ public class Query {
         QueryTerm(String t, double w) {
             term = t;
             weight = w;
-            // idf = 0;
         }
 
         // QueryTerm(String t, double w, double idf) {
@@ -110,6 +109,10 @@ public class Query {
             queryCopy.queryterm.add(new QueryTerm(t.term, t.weight));
         }
         return queryCopy;
+    }
+
+    public void addQueryTerm(String term) {
+        queryterm.add(new QueryTerm(term, alpha));
     }
 
     /**
