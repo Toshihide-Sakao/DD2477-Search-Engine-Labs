@@ -16,9 +16,9 @@ import java.io.File;
 public class Engine {
 
     /** The inverted index. */
-    // Index index = new HashedIndex();
+    Index index = new HashedIndex();
     // Assignment 1.7: Comment the line above and uncomment the next line
-    Index index = new PersistentHashedIndex();
+    // Index index = new PersistentHashedIndex();
 
     /** The indexer creating the search index. */
     Indexer indexer;
@@ -27,14 +27,14 @@ public class Engine {
     Searcher searcher;
 
     /** K-gram index */
-    KGramIndex kgIndex = null;
+    // KGramIndex kgIndex = null;
     // Assignment 3: Comment the line above and uncomment the next line
-    // KgramIndex kgIndex = new KGramIndex(2);
+    KGramIndex kgIndex = new KGramIndex(2);
 
     /** Spell checker */
     SpellChecker speller;
     // Assignment 3: Comment the line above and uncomment the next line
-    // SpellChecker = new SpellChecker( index, kgIndex );
+    // SpellChecker speller = new SpellChecker( index, kgIndex );
 
     /** The engine GUI. */
     SearchGUI gui;
@@ -87,9 +87,13 @@ public class Engine {
                 gui.displayInfoText(String.format("Indexing done in %.1f seconds.", elapsedTime / 1000.0));
 
                 
-                indexer.calcEucLengths();
+                // indexer.calcEucLengths();
                 index.cleanup();
-                searcher.getPageRank().compute();
+                // searcher.getPageRank().compute();
+
+                // Ass3.3
+                System.err.println("bigram ve: " + kgIndex.getIntersectAll(new String[]{"ve"}).size());
+                System.err.println("bigram th he: " + kgIndex.getIntersectAll(new String[]{"th", "he"}).size());
             }
         } else {
             // searcher

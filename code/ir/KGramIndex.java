@@ -45,6 +45,14 @@ public class KGramIndex {
         return K;
     }
 
+    public List<KGramPostingsEntry> getIntersectAll(String[] tokens) {
+        List<KGramPostingsEntry> answer = getPostings(tokens[0]);
+        for (int i = 1; i < tokens.length; i++) {
+            answer = intersect(answer, getPostings(tokens[i]));
+        }
+        return answer;
+    }
+
     /**
      * Get intersection of two postings lists
      */
@@ -69,9 +77,6 @@ public class KGramIndex {
 
     /** Inserts all k-grams from a token into the index. */
     public void insert(String token) {
-        if (token.equals("http://www.pinterest.com/pin/create/button/?description=abba%e2%80%99s%20bj%c3%b6rn%20ulvaeus%20on%20stockholm%27s%20travel%20highlights&url=https%3a%2f%2fwww.theguardian.com%2ftravel%2f2015%2fmay%2f22%2fbjorn-ulvaeus-abba-stockholm-sweden-travel%3fpage%3dwith%3aimg-3%23img-3&media=https%3a%2f%2fstatic.guim.co.uk%2fsys-images%2fguardian%2fpix%2fpictures%2f2015%2f5%2f21%2f1432216611190%2f20e6492d-934b-4ea8-b061-1b9735c6ebc5-2060x1539.jpeg")) {
-            System.err.println("ok, term2id contains token: " + term2id.containsKey(token));
-        }
         if (term2id.containsKey(token)) {
             // System.err.println("Token already exists in the index: " + token);
             return;
@@ -88,22 +93,16 @@ public class KGramIndex {
         // (n - 2) + 3 - k + (k)
         for (int i = K; i < token.length() + 1; i++) {
             String kgram = token.substring(i - K, i).trim();
-            
-            // System.err.println("Inserting kgram: " + kgram);
-
-            
-
+            //     System.err.println("Inserting kgram: " + kgram);
             if (index.containsKey(kgram)) {
                 entries = index.get(kgram);
+                if (entries.get(entries.size() - 1).tokenID != id) {
+                    entries.add(new KGramPostingsEntry(id));
+                }
             } else {
                 entries = new ArrayList<KGramPostingsEntry>();
+                entries.add(new KGramPostingsEntry(id));
             }
-
-            if (entries.contains(new KGramPostingsEntry(id))) {
-                System.err.println("DEBUG: Found token in the index: " + token);
-            }
-
-            entries.add(new KGramPostingsEntry(id));
             index.put(kgram, entries);
         }
     }
@@ -118,12 +117,12 @@ public class KGramIndex {
             return new ArrayList<KGramPostingsEntry>();
         }
 
-        System.err.println("DEBUG: Found " + postings.size() + " posting(s) for kgram: " + kgram);
-        System.err.printf("DEBUG: postings: \n");
-        for (int i = 0; i < postings.size(); i++) {
-            System.err.printf("%d. %s \n", i, id2term.get(postings.get(i).tokenID));
-        }
-        System.err.println();
+        // System.err.println("DEBUG: Found " + postings.size() + " posting(s) for kgram: " + kgram);
+        // System.err.printf("DEBUG: postings: \n");
+        // for (int i = 0; i < postings.size(); i++) {
+        //     System.err.printf("%d. %s \n", i, id2term.get(postings.get(i).tokenID));
+        // }
+        // System.err.println();
 
         return postings;
     }

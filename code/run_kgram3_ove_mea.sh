@@ -1,1 +1,0 @@
-java -cp classes ir.KGramIndex -f ./data/kgram_test.txt -p patterns.txt -k 2 -kg "ve"

@@ -22,4 +22,11 @@ public class KGramPostingsEntry {
     public String toString() {
         return tokenID + "";
     }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof KGramPostingsEntry) {
+            return tokenID == ((KGramPostingsEntry) obj).tokenID;
+        }
+        return false;
+    }
 }
