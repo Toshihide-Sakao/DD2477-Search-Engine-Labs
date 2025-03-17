@@ -29,7 +29,7 @@ public class PostingsList {
     public void add(int docID, int offset, double score) {
         // int contains = cointains(docID);
         if (docID == lastDocID) {
-            list.get(list.size()-1).addOffset(offset);
+            list.get(list.size() - 1).addOffset(offset);
             return;
         }
         PostingsEntry entry = new PostingsEntry(docID, score, offset);
@@ -39,30 +39,30 @@ public class PostingsList {
 
     public void add(int docID, ArrayList<Integer> offsets, double score) {
         if (docID == lastDocID) {
-            for (int i = 0; i < offsets.size(); i++) {
-                list.get(list.size()-1).addOffset(offsets.get(i));
-            }
+            list.get(list.size() - 1).addOffsets(offsets);
             return;
         }
         PostingsEntry entry = new PostingsEntry(docID, score, offsets.get(0));
         list.add(entry);
-        for (int i = 1; i < offsets.size(); i++) {
-            list.get(list.size()-1).addOffset(offsets.get(i));
-        }
+        list.get(list.size() - 1).addOffsets(offsets);
         lastDocID = docID;
     }
 
+    public void add(PostingsEntry entry) {
+        list.add(entry);
+    }
+
     public void addOffsetToLast(int offset) {
-        list.get(list.size()-1).addOffset(offset);
+        list.get(list.size() - 1).addOffset(offset);
     }
 
     // private int cointains(int docID) {
-    //     for (int i = 0; i < list.size(); i++) {
-    //         if (list.get(i).docID == docID) {
-    //             return i;
-    //         }
-    //     }
-    //     return -1;
+    // for (int i = 0; i < list.size(); i++) {
+    // if (list.get(i).docID == docID) {
+    // return i;
+    // }
+    // }
+    // return -1;
     // }
 
     // N: number of DocID
@@ -83,7 +83,7 @@ public class PostingsList {
     }
 
     public void sort() {
-        list.sort( (a, b) -> {
+        list.sort((a, b) -> {
             return Double.compare(b.score, a.score);
         });
     }

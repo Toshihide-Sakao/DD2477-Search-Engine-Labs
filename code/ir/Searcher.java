@@ -282,28 +282,51 @@ public class Searcher {
         int j = 0;
         while (i < p1.size() && j < p2.size()) {
             if (p1.get(i).docID == p2.get(j).docID) {
-                answer.add(p1.get(i).docID, p1.get(i).getOffsets(), 0);
-                answer.add(p1.get(i).docID, p2.get(j).getOffsets(), 0);
+                answer.add(p1.get(i));
                 i++;
                 j++;
             } else if (p1.get(i).docID < p2.get(j).docID) {
-                answer.add(p1.get(i).docID, p1.get(i).getOffsets(), 0);
+                answer.add(p1.get(i));
                 i++;
             } else {
-                answer.add(p2.get(j).docID, p2.get(j).getOffsets(), 0);
+                answer.add(p2.get(j));
                 j++;
             }
         }
         while (i < p1.size()) {
-            answer.add(p1.get(i).docID, p1.get(i).getOffsets(), 0);
+            answer.add(p1.get(i));
             i++;
         }
         while (j < p2.size()) {
-            answer.add(p2.get(j).docID, p2.get(j).getOffsets(), 0);
+            answer.add(p2.get(j));
             j++;
         }
 
         return answer;
+    }
+
+    private PostingsList UnionBad(PostingsList p1, PostingsList p2) {
+        int i = 0;
+        int j = 0;
+        while (i < p1.size() && j < p2.size()) {
+            if (p1.get(i).docID == p2.get(j).docID) {
+                p1.get(i).getOffsets().addAll(p2.get(j).getOffsets());
+                p1.get(i).score += p2.get(j).score;
+                i++;
+                j++;
+            } else if (p1.get(i).docID < p2.get(j).docID) {
+                i++;
+            } else {
+                p1.add(p2.get(j));
+                j++;
+            }
+        }
+        while (j < p2.size()) {
+            p1.add(p2.get(j));
+            j++;
+        }
+
+        return p1;
     }
 
     private PostingsList getWildPostings(String token) {

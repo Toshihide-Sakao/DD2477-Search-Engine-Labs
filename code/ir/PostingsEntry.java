@@ -39,6 +39,10 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
         offsets.add(offset);
     }
 
+    public void addOffsets(ArrayList<Integer> offsets) {
+        this.offsets.addAll(offsets);
+    }
+
     public int getOffset(int i) {
         return offsets.get(i);
     }
