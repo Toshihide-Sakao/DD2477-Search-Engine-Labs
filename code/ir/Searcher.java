@@ -8,6 +8,7 @@
 package ir;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -283,6 +284,10 @@ public class Searcher {
         while (i < p1.size() && j < p2.size()) {
             if (p1.get(i).docID == p2.get(j).docID) {
                 answer.add(p1.get(i));
+                System.err.println("docID: " + Index.docNames.get(p1.get(i).docID) + " old offsets: " + answer.get(answer.size() - 1).getOffsets().toString());
+                answer.get(answer.size() - 1).getOffsets().addAll(p2.get(j).getOffsets());
+                System.err.println("new offsets: " + answer.get(answer.size() - 1).getOffsets().toString());
+                answer.get(answer.size() - 1).score += p2.get(j).score;
                 i++;
                 j++;
             } else if (p1.get(i).docID < p2.get(j).docID) {
@@ -336,7 +341,7 @@ public class Searcher {
         }
         Query expanded = expandWild(token, starIndex);
 
-        PrintSearchedTerms(expanded);
+        // PrintSearchedTerms(expanded);
         PostingsList answer = UnionAll(expanded);
         System.err.println("DEBUG: expanded size: " + expanded.queryterm.size());
         System.err.println("DEBUG: expanded answer size: " + answer.size());
@@ -347,7 +352,7 @@ public class Searcher {
     private Query expandWild(String token, int starIndex) {
         Query expanded = new Query();
         ArrayList<String> kStrings = new ArrayList<String>();
-        token = "$" + token + "$";
+        token = "^" + token + "$";
         // before *
         for (int j = kgIndex.K; j < starIndex + 1 + 1; j++) {
             String kgram = token.substring(j - kgIndex.K, j);
@@ -362,18 +367,23 @@ public class Searcher {
 
             System.err.println("Inserting kgram: " + kgram);
         }
-        addKGramsToQuery(expanded, kStrings);
+        token = token.substring(0, starIndex + 1) + "." + token.substring(starIndex + 1);
+        addKGramsToQuery(expanded, kStrings, token);
 
         return expanded;
     }
 
-    public void addKGramsToQuery(Query query, ArrayList<String> kStrings) {
+    public void addKGramsToQuery(Query query, ArrayList<String> kStrings, String oriToken) {
         List<KGramPostingsEntry> kgPostings = kgIndex.getIntersectAll(kStrings);
         if (kgPostings == null) {
             return;
         }
         for (int i = 0; i < kgPostings.size(); i++) {
-            query.addQueryTerm(kgIndex.id2term.get(kgPostings.get(i).tokenID));
+            String tok = kgIndex.id2term.get(kgPostings.get(i).tokenID);
+            // System.err.println("DEBUG: tok: " + tok + " oriToken: " + oriToken);
+            if (tok.matches(oriToken)) {
+                query.addQueryTerm(tok);
+            }
         }
     }
 

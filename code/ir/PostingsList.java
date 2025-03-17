@@ -7,6 +7,7 @@
 
 package ir;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -55,15 +56,6 @@ public class PostingsList {
     public void addOffsetToLast(int offset) {
         list.get(list.size() - 1).addOffset(offset);
     }
-
-    // private int cointains(int docID) {
-    // for (int i = 0; i < list.size(); i++) {
-    // if (list.get(i).docID == docID) {
-    // return i;
-    // }
-    // }
-    // return -1;
-    // }
 
     // N: number of DocID
     // ; end of DocID

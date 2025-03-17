@@ -54,4 +54,5 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     public ArrayList<Integer> getOffsets() {
         return offsets;
     }
+
 }
