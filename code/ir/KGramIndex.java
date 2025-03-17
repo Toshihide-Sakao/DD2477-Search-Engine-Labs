@@ -45,10 +45,10 @@ public class KGramIndex {
         return K;
     }
 
-    public List<KGramPostingsEntry> getIntersectAll(String[] tokens) {
-        List<KGramPostingsEntry> answer = getPostings(tokens[0]);
-        for (int i = 1; i < tokens.length; i++) {
-            answer = intersect(answer, getPostings(tokens[i]));
+    public List<KGramPostingsEntry> getIntersectAll(ArrayList<String> tokens) {
+        List<KGramPostingsEntry> answer = getPostings(tokens.get(0));
+        for (int i = 1; i < tokens.size(); i++) {
+            answer = intersect(answer, getPostings(tokens.get(i)));
         }
         return answer;
     }

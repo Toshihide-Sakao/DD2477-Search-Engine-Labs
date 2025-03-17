@@ -292,11 +292,19 @@ public class Searcher {
 
     private Query expandWild(String token, int starIndex) {
         Query expanded = new Query();
-        String[] kStrings = new String[starIndex + 1 + 1 - kgIndex.K];
+        ArrayList<String> kStrings = new ArrayList<String>();
         token = "$" + token + "$";
+        // before *
         for (int j = kgIndex.K; j < starIndex + 1 + 1; j++) {
             String kgram = token.substring(j - kgIndex.K, j);
-            kStrings[j - kgIndex.K] = kgram;
+            kStrings.add(kgram);
+
+            System.err.println("Inserting kgram: " + kgram);
+        }
+        // after * FIX: not working
+        for (int j = starIndex + 1 + 1; j < token.length() + 2; j++) {
+            String kgram = token.substring(j - kgIndex.K, j);
+            kStrings.add(kgram);
 
             System.err.println("Inserting kgram: " + kgram);
         }
@@ -305,7 +313,7 @@ public class Searcher {
         return expanded;
     }
 
-    public void addKGramsToQuery(Query query, String[] kStrings) {
+    public void addKGramsToQuery(Query query, ArrayList<String> kStrings) {
         List<KGramPostingsEntry> kgPostings = kgIndex.getIntersectAll(kStrings);
         if (kgPostings == null) {
             return;

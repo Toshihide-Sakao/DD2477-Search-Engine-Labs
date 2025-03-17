@@ -92,8 +92,13 @@ public class Engine {
                 // searcher.getPageRank().compute();
 
                 // Ass3.3
-                System.err.println("bigram ve: " + kgIndex.getIntersectAll(new String[]{"ve"}).size());
-                System.err.println("bigram th he: " + kgIndex.getIntersectAll(new String[]{"th", "he"}).size());
+                ArrayList<String> testQuery = new ArrayList<String>();
+                testQuery.add("ve");
+                System.err.println("bigram ve: " + kgIndex.getIntersectAll(testQuery).size());
+                testQuery = new ArrayList<>();
+                testQuery.add("th");
+                testQuery.add("he");
+                System.err.println("bigram th he: " + kgIndex.getIntersectAll(testQuery).size());
             }
         } else {
             // searcher
