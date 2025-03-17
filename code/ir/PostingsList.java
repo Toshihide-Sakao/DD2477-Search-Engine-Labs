@@ -37,6 +37,21 @@ public class PostingsList {
         lastDocID = docID;
     }
 
+    public void add(int docID, ArrayList<Integer> offsets, double score) {
+        if (docID == lastDocID) {
+            for (int i = 0; i < offsets.size(); i++) {
+                list.get(list.size()-1).addOffset(offsets.get(i));
+            }
+            return;
+        }
+        PostingsEntry entry = new PostingsEntry(docID, score, offsets.get(0));
+        list.add(entry);
+        for (int i = 1; i < offsets.size(); i++) {
+            list.get(list.size()-1).addOffset(offsets.get(i));
+        }
+        lastDocID = docID;
+    }
+
     public void addOffsetToLast(int offset) {
         list.get(list.size()-1).addOffset(offset);
     }

@@ -34,16 +34,14 @@ public class Query {
             weight = w;
         }
 
-        // QueryTerm(String t, double w, double idf) {
-        //     term = t;
-        //     weight = w;
-        //     this.idf = idf;
-        // }
-
         @Override
         public boolean equals(Object o) {
             return term.equals(o);
         }
+
+        // public boolean contains(String t) {
+        //     return term.equals(t);
+        // }
     }
 
     /**
@@ -128,9 +126,6 @@ public class Query {
         int N = Index.docNames.size();
         // a * q_ori + b * (weight_doc / len_rel_docs)
         for (int i = 0; i < queryterm.size(); i++) {
-            // int df_t = engine.index.getPostings(queryterm.get(i).term).size();
-            // double idf_t = Math.log((double) N / (double) df_t);
-            // queryterm.get(i).idf = idf_t;
             queryterm.get(i).weight = alpha;
         }
         // System.err.println(docIsRelevant.length + " " + results.size());
@@ -138,18 +133,11 @@ public class Query {
         for (int i = 0; i < docIsRelevant.length; i++) {
             if (docIsRelevant[i]) {
                 ArrayList<String> contents = getDocContent(results.get(i).docID, engine);
-                // System.err.println("DEBUG: N: " + N);
-                // System.err.println("DEBUG: numRelevant: " + numRelevant);
-                // System.err.println("DEBUG: contents: " + contents.size());
                 for (int j = 0; j < contents.size(); j++) {
                     int index = find(contents.get(j));
                     if (index != -1) {
                         queryterm.get(index).weight += beta * (1 / numRelevant);
                     } else {
-                        // int df_t = engine.index.getPostings(contents.get(j)).size();
-                        // double idf_t = Math.log((double) N / (double) df_t);
-                        // System.err.println("DEBUG: term: " + contents.get(j) + " idf_t: " + idf_t + " weight: "
-                        //         + beta * (idf_t / numRelevant));
                         queryterm.add(new QueryTerm(contents.get(j), beta * (1 / numRelevant)));
                     }
 

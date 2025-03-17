@@ -270,7 +270,37 @@ public class Searcher {
             if (next == null) {
                 continue;
             }
-            answer.merge(next, 0);
+            answer = Union(answer, next);
+        }
+
+        return answer;
+    }
+
+    private PostingsList Union(PostingsList p1, PostingsList p2) {
+        PostingsList answer = new PostingsList();
+        int i = 0;
+        int j = 0;
+        while (i < p1.size() && j < p2.size()) {
+            if (p1.get(i).docID == p2.get(j).docID) {
+                answer.add(p1.get(i).docID, p1.get(i).getOffsets(), 0);
+                answer.add(p1.get(i).docID, p2.get(j).getOffsets(), 0);
+                i++;
+                j++;
+            } else if (p1.get(i).docID < p2.get(j).docID) {
+                answer.add(p1.get(i).docID, p1.get(i).getOffsets(), 0);
+                i++;
+            } else {
+                answer.add(p2.get(j).docID, p2.get(j).getOffsets(), 0);
+                j++;
+            }
+        }
+        while (i < p1.size()) {
+            answer.add(p1.get(i).docID, p1.get(i).getOffsets(), 0);
+            i++;
+        }
+        while (j < p2.size()) {
+            answer.add(p2.get(j).docID, p2.get(j).getOffsets(), 0);
+            j++;
         }
 
         return answer;
@@ -285,6 +315,7 @@ public class Searcher {
 
         PrintSearchedTerms(expanded);
         PostingsList answer = UnionAll(expanded);
+        System.err.println("DEBUG: expanded size: " + expanded.queryterm.size());
         System.err.println("DEBUG: expanded answer size: " + answer.size());
 
         return answer;
@@ -302,7 +333,7 @@ public class Searcher {
             System.err.println("Inserting kgram: " + kgram);
         }
         // after * FIX: not working
-        for (int j = starIndex + 1 + 1; j < token.length() + 2; j++) {
+        for (int j = starIndex + 1 + 1 + 2; j < token.length() + 1; j++) {
             String kgram = token.substring(j - kgIndex.K, j);
             kStrings.add(kgram);
 
