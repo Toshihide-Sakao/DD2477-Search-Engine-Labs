@@ -23,6 +23,12 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
         this.offsets.add(offset);
     }
 
+    public PostingsEntry(int docID, double score, ArrayList<Integer> offsets) {
+        this.docID = docID;
+        this.score = score;
+        this.offsets = offsets;
+    }
+
     /**
      * PostingsEntries are compared by their score (only relevant
      * in ranked retrieval).

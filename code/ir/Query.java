@@ -39,6 +39,11 @@ public class Query {
             return term.equals(o);
         }
 
+        @Override
+        public String toString() {
+            return term;
+        }
+
         // public boolean contains(String t) {
         //     return term.equals(t);
         // }

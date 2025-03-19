@@ -50,7 +50,8 @@ public class PostingsList {
     }
 
     public void add(PostingsEntry entry) {
-        list.add(entry);
+        // list.add(entry);
+        list.add(new PostingsEntry(entry.docID, entry.score, entry.getOffsets()));
     }
 
     public void addOffsetToLast(int offset) {
