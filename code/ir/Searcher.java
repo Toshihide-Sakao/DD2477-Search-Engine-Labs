@@ -186,6 +186,25 @@ public class Searcher {
         return answer;
     }
 
+    // TODO: some abstraction so I can idk am tired
+    // private double get_tf_idf_dt(String term) {
+    //     PostingsList answer = index.getPostings(term);
+
+    //     int tf_dt = answer.get(i).getOffsets().size();
+
+    //     double len_d = 0;
+    //     if (normType == NormalizationType.NUMBER_OF_WORDS) {
+    //         len_d = Index.docLengths.get(answer.get(i).docID);
+    //     } else {
+    //         len_d = Index.docEucLengths.get(answer.get(i).docID);
+    //     }
+
+    //     double tf_idf_dt = tf_dt * idf_t * query.queryterm.get(j).weight / (double) len_d;
+    //     answer.get(i).setScore(tf_idf_dt);
+
+    //     return tf_idf_dt;
+    // }
+
     // 4 elements
     // e.g. 0 to 1, 1 to 2, 2 to 3
     private PostingsList IntersectAll(Query query) {
