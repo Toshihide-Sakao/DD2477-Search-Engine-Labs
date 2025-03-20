@@ -129,43 +129,32 @@ public class Searcher {
     }
 
     private PostingsList RankedAllTF_IDF(Query query, NormalizationType normType) {
-        // System.err.println("DEBUG: query: " + query.queryterm.toString());
-        PostingsList answer = RankedTF_IDF(query, 0, normType);
-        // PostingsList answer = RankedTF_IDFWild(query, 0, normType);
+        query = expandWildQuery(query);
+        System.err.println("DEBUG: expanded query size: " + query.queryterm.size());
+
+        PostingsList answer = RankedTF_IDF(query.queryterm.get(0), normType);
         if (answer == null) {
             answer = new PostingsList();
         }
         for (int i = 1; i < query.queryterm.size(); i++) {
-            PostingsList next = RankedTF_IDF(query, i, normType);
-            // PostingsList next = RankedTF_IDFWild(query, i, normType);
+            PostingsList next = RankedTF_IDF(query.queryterm.get(i), normType);
             if (next == null) {
                 continue;
             }
-            // System.err.println("DEBUG: next size: " + next.size());
-            answer.merge(next, 0);
+            // answer.merge(next, 0);
+            answer = Union(answer, next);
         }
 
-        // System.err.println("DEBUG: answer size: " + answer.size());
+        System.err.println("DEBUG: answer size: " + answer.size());
 
         answer.sort();
         return answer;
     }
 
-    private PostingsList RankedTF_IDFWild(Query query, int j, NormalizationType normType) {
-        int starIndex = query.queryterm.get(j).term.indexOf("*");
-        if (starIndex == -1) {
-            return RankedTF_IDF(query, j, normType);
-        }
-
-        Query expanded = expandWild(query.queryterm.get(j).term, starIndex);
-        System.err.println("DEBUG: expanded size: " + expanded.queryterm.size());
-        return RankedAllTF_IDF(expanded, normType);
-    }
-
-    private PostingsList RankedTF_IDF(Query query, int j, NormalizationType normType) {
+    private PostingsList RankedTF_IDF(Query.QueryTerm qTerm, NormalizationType normType) {
         int N = Index.docNames.size();
-        // PostingsList answer = index.getPostings(query.queryterm.get(j).term);
-        PostingsList answer = getWildPostings(query.queryterm.get(j).term);
+        PostingsList answer = index.getPostings(qTerm.term);
+        // PostingsList answer = getWildPostings(query.queryterm.get(j).term);
         int df_t = answer.size();
         double idf_t = Math.log((double) N / (double) df_t);
         // System.out.println("DEBUG: idf_t: " + idf_t);
@@ -180,30 +169,11 @@ public class Searcher {
                 len_d = Index.docEucLengths.get(answer.get(i).docID);
             }
 
-            double tf_idf_dt = tf_dt * idf_t * query.queryterm.get(j).weight / (double) len_d;
+            double tf_idf_dt = tf_dt * idf_t * qTerm.weight / (double) len_d;
             answer.get(i).setScore(tf_idf_dt);
         }
         return answer;
     }
-
-    // TODO: some abstraction so I can idk am tired
-    // private double get_tf_idf_dt(String term) {
-    //     PostingsList answer = index.getPostings(term);
-
-    //     int tf_dt = answer.get(i).getOffsets().size();
-
-    //     double len_d = 0;
-    //     if (normType == NormalizationType.NUMBER_OF_WORDS) {
-    //         len_d = Index.docLengths.get(answer.get(i).docID);
-    //     } else {
-    //         len_d = Index.docEucLengths.get(answer.get(i).docID);
-    //     }
-
-    //     double tf_idf_dt = tf_dt * idf_t * query.queryterm.get(j).weight / (double) len_d;
-    //     answer.get(i).setScore(tf_idf_dt);
-
-    //     return tf_idf_dt;
-    // }
 
     // 4 elements
     // e.g. 0 to 1, 1 to 2, 2 to 3
@@ -325,7 +295,7 @@ public class Searcher {
             if (p1.get(i).docID == p2.get(j).docID) {
                 answer.add(p1.get(i));
                 answer.get(answer.size() - 1).getOffsets().addAll(p2.get(j).getOffsets());
-                // answer.get(answer.size() - 1).score += p2.get(j).score;
+                answer.get(answer.size() - 1).score += p2.get(j).score;
 
                 answer.get(answer.size() - 1).getOffsets().sort((a, b) -> {
                     return Integer.compare(a, b);
@@ -367,6 +337,25 @@ public class Searcher {
         // System.err.println("DEBUG: expanded answer: " + answer.toString());
 
         return answer;
+    }
+
+    private Query expandWildQuery(Query query) {
+        Query expanded = new Query();
+        for (int i = 0; i < query.queryterm.size(); i++) {
+            String token = query.queryterm.get(i).term;
+            int starIndex = token.indexOf("*");
+            if (starIndex == -1) {
+                expanded.queryterm.add(query.queryterm.get(i));
+                continue;
+            }
+
+            Query expandedToken = expandWild(token, starIndex);
+            for (int j = 0; j < expandedToken.queryterm.size(); j++) {
+                expanded.queryterm.add(expandedToken.queryterm.get(j));
+            }
+        }
+
+        return expanded;
     }
 
     private Query expandWild(String token, int starIndex) {
