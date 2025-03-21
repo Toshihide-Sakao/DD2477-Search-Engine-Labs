@@ -92,7 +92,7 @@ public class PostingsList {
             if (list.get(i).docID == other.get(j).docID) {
                 if (TYPE == 0) { // IF_IDF
                     list.get(i).getOffsets().addAll(other.get(j).getOffsets());
-                    list.get(i).score += other.get(j).score;
+                    // list.get(i).score += other.get(j).score;
                 }
                 i++;
                 j++;
