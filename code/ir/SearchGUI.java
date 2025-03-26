@@ -8,12 +8,10 @@ package ir;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
-import javax.swing.border.*;
-import java.util.*;
 import java.io.*;
+import java.util.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
 
 /**
@@ -304,18 +302,18 @@ public class SearchGUI extends JFrame {
         for ( i=0; i<results.size() && i<maxResultsToDisplay; i++ ) {
             String description = i + ". " + displayableFileName( engine.index.docNames.get( results.get(i).docID ));
             // DEBUG for 3.2
-            String forPrint = i + "\t" + displayableFileName( engine.index.docNames.get( results.get(i).docID )) + "\t";
+            // String forPrint = i + "\t" + displayableFileName( engine.index.docNames.get( results.get(i).docID )) + "\t";
             // ---------------
             if ( queryType == QueryType.RANKED_QUERY ) {
                 description += "   " + String.format( "%.5f", results.get(i).score );
                 // DEBUG for 3.2
-                forPrint += String.format( "%.5f", results.get(i).score );
+                // forPrint += String.format( "%.5f", results.get(i).score );
                 // ---------------
             }
             // DEBUG for 3.2
-            if (i <= 50) {
-                System.out.println(forPrint);
-            }
+            // if (i <= 50) {
+            //     System.out.println(forPrint);
+            // }
             // ---------------
             box[i] = new JCheckBox();
             box[i].setSelected( false );

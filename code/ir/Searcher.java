@@ -8,7 +8,6 @@
 package ir;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -296,10 +295,7 @@ public class Searcher {
                 answer.add(p1.get(i));
                 if (addOffsets == true) {
                     if (!answer.get(answer.size() - 1).getOffsets().contains(p2.get(j).getOffsets().get(0))) {
-                        System.err.println("DEBUG: old offsets: " + answer.get(answer.size() - 1).getOffsets().toString());
                         answer.get(answer.size() - 1).getOffsets().addAll(p2.get(j).getOffsets());
-                        System.err.println("DEBUG: new offsets: " + answer.get(answer.size() - 1).getOffsets().toString());
-                        
                         answer.get(answer.size() - 1).getOffsets().sort((a, b) -> {
                             return Integer.compare(a, b);
                         });
@@ -337,6 +333,9 @@ public class Searcher {
         Query expanded = expandWild(token, starIndex);
 
         // PrintSearchedTerms(expanded);
+        if (expanded.queryterm.size() == 0) {
+            return new PostingsList();
+        }
         PostingsList answer = UnionAll(expanded, addOffsets);
         System.err.println("DEBUG: expanded size: " + expanded.queryterm.size());
         System.err.println("DEBUG: expanded answer size: " + answer.size());
@@ -373,14 +372,14 @@ public class Searcher {
             String kgram = token.substring(j - kgIndex.K, j);
             kStrings.add(kgram);
 
-            System.err.println("Inserting kgram: " + kgram);
+            // System.err.println("DEBUG: Inserting kgram: " + kgram);
         }
 
         for (int j = starIndex + 1 + 1 + 2; j < token.length() + 1; j++) {
             String kgram = token.substring(j - kgIndex.K, j);
             kStrings.add(kgram);
 
-            System.err.println("Inserting kgram: " + kgram);
+            // System.err.println("DEBUG: Inserting kgram: " + kgram);
         }
         token = token.substring(0, starIndex + 1) + "." + token.substring(starIndex + 1);
         addKGramsToQuery(expanded, kStrings, token);
