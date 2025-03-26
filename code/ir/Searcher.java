@@ -130,8 +130,8 @@ public class Searcher {
 
     private PostingsList RankedAllTF_IDF(Query oldQuery, NormalizationType normType) {
         Query query = expandWildQuery(oldQuery);
-        System.err.println("DEBUG: expanded query size: " + query.queryterm.size());
-        System.err.println("DEBUG: expanded query: " + query.queryterm.toString());
+        // System.err.println("DEBUG: expanded query size: " + query.queryterm.size());
+        // System.err.println("DEBUG: expanded query: " + query.queryterm.toString());
 
         PostingsList answer = RankedTF_IDF(query.queryterm.get(0), normType);
         if (answer == null) {
